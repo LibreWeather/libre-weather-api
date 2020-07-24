@@ -1,0 +1,185 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "version": "0.0.0",
+    "title": "LibreWeather API",
+    "termsOfService": "https://libreweather.com/terms/",
+    "contact": {
+      "email": "apiteam@libreweather.com"
+    },
+    "license": {
+      "name": "AGPL v3.0",
+      "url": "https://opensource.org/licenses/AGPL-3.0"
+    }
+  },
+  "paths": {
+    "/weather": {
+      "get": {
+        "summary": "Get the weather for a given latitude and longitude or weather location code. If one of the combinations is not present, a 400 will be thrown.",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "x-latitude",
+            "schema": {
+              "type": "integer"
+            },
+            "description": "Latitude value for location",
+            "required": false
+          },
+          {
+            "in": "header",
+            "name": "x-longitude",
+            "schema": {
+              "type": "integer"
+            },
+            "description": "Longitude value for location",
+            "required": false
+          },
+          {
+            "in": "header",
+            "name": "x-weather-code",
+            "schema": {
+              "type": "string"
+            },
+            "description": "Weather Location code. Commonly used by The Weather Channel, Yahoo! Weather and AOL Weather",
+            "required": true
+          },
+          {
+            "in": "header",
+            "required": true,
+            "name": "x-api-token",
+            "description": "Access token",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "required": true,
+            "name": "x-unit",
+            "description": "unit of measure to use for temperature and distance",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Weather data of the area",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Weather"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "Weather": {
+        "properties": {
+          "source": {
+            "type": "string",
+            "enum": [
+              "OWM"
+            ]
+          },
+          "current": {
+            "type": "object",
+            "properties": {
+              "condition": {
+                "type": "string"
+              },
+              "description": {
+                "type": "object",
+                "properties": {
+                  "long": {
+                    "type": "string",
+                    "description": "Long description of the current weather"
+                  },
+                  "short": {
+                    "type": "string",
+                    "description": "Short succinct description of the current weather"
+                  }
+                }
+              },
+              "temp": {
+                "$ref": "#/components/schemas/Temperature"
+              },
+              "feelsLike": {
+                "$ref": "#/components/schemas/Temperature"
+              },
+              "windspeed": {
+                "$ref": "#/components/schemas/Windspeed"
+              },
+              "humidity": {
+                "type": "number",
+                "description": "Numeric value of the humidity percent, to a hundredths precision."
+              },
+              "uvIndex": {
+                "type": "number",
+                "description": "Numeric value of the current UV index, to a hundredths precision."
+              },
+              "dewPoint": {
+                "decription": "The atmospheric temperature (varying according to pressure and humidity) below which water droplets begin to condense and dew can form.",
+                "$ref": "#/components/schemas/Temperature"
+              }
+            }
+          },
+          "daily": {
+            "type": "array",
+            "description": "Array of daily max and min temps, starting with today.",
+            "items": {
+              "$ref": "#/components/schemas/Forecast"
+            }
+          }
+        }
+      },
+      "Temperature": {
+        "properties": {
+          "value": {
+            "type": "number",
+            "description": "Numeric value of the temperature, to a hundredths precision."
+          },
+          "unit": {
+            "type": "string",
+            "enum": [
+              "kelvin",
+              "metric",
+              "imperial"
+            ]
+          }
+        }
+      },
+      "Windspeed": {
+        "properties": {
+          "direction": {
+            "type": "string",
+            "description": "Direction of the wind"
+          },
+          "magnitude": {
+            "type": "string",
+            "description": "Magnitude of the wind speed"
+          },
+          "unit": {
+            "type": "string"
+          }
+        }
+      },
+      "Forecast": {
+        "properties": {
+          "min": {
+            "$ref": "#/components/schemas/Temperature"
+          },
+          "max": {
+            "$ref": "#/components/schemas/Temperature"
+          }
+        }
+      }
+    }
+  }
+}
