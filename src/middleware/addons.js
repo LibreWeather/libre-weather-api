@@ -8,6 +8,16 @@ const swaggerui = require('swagger-ui-express');
 const helmet = require('helmet');
 const cors = require('cors');
 
+// caching
+const cache = require('apicache').options({
+  appendKey: (req) => {
+    const lat = req.header('x-latitude');
+    const lon = req.header('x-longitude');
+    const locCd = req.header('x-weather-code');
+    return `${req.path}-${lat}-${lon}-${locCd}`;
+  },
+}).middleware;
+
 const spec = require('../api-spec/openapi.json');
 
 // Some dependency/config stuff
@@ -36,6 +46,8 @@ const initSwagger = (app) => {
 const init = (app) => {
   initSwagger(app);
   initSecurity(app);
+
+  app.use(cache('20 minutes'));
 
   app.use(require('express-favicon-short-circuit'));
 };

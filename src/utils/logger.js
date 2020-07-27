@@ -33,17 +33,25 @@ const color = (scope = 'PROC') => {
  */
 const setup = (scope = 'PROC') => {
   /* Logger setup */
-  const transport = new transports.Console({ colorize: true });
+  const consoleTransport = new transports.Console({ colorize: true });
+
   const logFormat = printf((info) => `[${info.label}] ${info.level}: ${info.message}`);
   const logger = createLogger({
+    level: process.env.LOG_LEVEL || 'error',
     format: combine(
       colorize(),
       label({ label: color(scope) }),
       logFormat,
     ),
-    transports: [transport],
+    transports: [
+      new transports.File({ filename: 'error.log', level: 'error' }),
+      new transports.File({ filename: 'combined.log' }),
+    ],
   });
-  logger.level = process.env.LOG_LEVEL || 'error';
+  
+  if (process.env.NODE_ENV !== 'production') {
+    logger.add(consoleTransport);
+  }
   return logger;
 };
 
