@@ -21,7 +21,7 @@
             "in": "header",
             "name": "x-latitude",
             "schema": {
-              "type": "integer"
+              "type": "number"
             },
             "description": "Latitude value for location",
             "required": false
@@ -30,7 +30,7 @@
             "in": "header",
             "name": "x-longitude",
             "schema": {
-              "type": "integer"
+              "type": "number"
             },
             "description": "Longitude value for location",
             "required": false
@@ -113,8 +113,32 @@
               "feelsLike": {
                 "$ref": "#/components/schemas/Temperature"
               },
+              "pressure": {
+                "type": "object",
+                "properties": {
+                  "value": {
+                    "type": "number",
+                    "description": "Numeric value of the atmospheric pressure"
+                  },
+                  "unit": {
+                    "type": "string"
+                  }
+                }
+              },
               "windspeed": {
                 "$ref": "#/components/schemas/Windspeed"
+              },
+              "visibility": {
+                "type": "object",
+                "properties": {
+                  "value": {
+                    "type": "number",
+                    "description": "Numeric value of the distance, to a hundredths precision."
+                  },
+                  "unit": {
+                    "type": "string"
+                  }
+                }
               },
               "humidity": {
                 "type": "number",

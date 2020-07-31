@@ -25,6 +25,24 @@ const tempUnit = (system) => {
   }
 };
 
+const distanceFromMeters = (system, distance) => {
+  switch (system) {
+    case 'imperial':
+      return Number.parseFloat(0.00062137119223733 * distance).toPrecision(2);
+    default:
+      return distance;
+  }
+}
+
+const distanceUnit = (system) => {
+  switch (system) {
+    case 'imperial':
+      return 'mi';
+    default:
+      return 'm';
+  }
+}
+
 const wrapOWM = (data, unit) => ({
   current: {
     condition: data.current.weather[0].id,
@@ -44,7 +62,15 @@ const wrapOWM = (data, unit) => ({
       unit: velocityUnit(unit),
     },
     humidity: Number.parseFloat(data.current.humidity).toPrecision(2),
+    pressure: {
+      value: data.current.pressure,
+      unit: 'hPa'
+    },
     uvIndex: Number.parseFloat(data.current.uvi),
+    visibility: {
+      value: distanceFromMeters(unit, Number.parseFloat(data.current.visibility)),
+      unit: distanceUnit(unit)
+    },
     dewPoint: {
       value: Number.parseFloat(data.current.dew_point),
       unit: tempUnit(unit),
@@ -87,10 +113,10 @@ router.get('/', async (req, res) => {
       return res.json(wrapOWM(data, unit)).end();
     } catch (e) {
       logger.debug(e);
-      return res.send(500).end();
+      return res.sendStatus(500).end();
     }
   } else {
-    return res.send(400).end();
+    return res.sendStatus(400).end();
   }
 });
 
