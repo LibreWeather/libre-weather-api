@@ -15,8 +15,17 @@
   "paths": {
     "/weather": {
       "get": {
-        "summary": "Get the weather for a given latitude and longitude or weather location code. If one of the combinations is not present, a 400 will be thrown.",
+        "summary": "Get the weather data for a given latitude and longitude.",
         "parameters": [
+          {
+            "in": "header",
+            "name": "x-api-token",
+            "schema": {
+              "type": "string"
+            },
+            "description": "API Access token",
+            "required": false
+          },
           {
             "in": "header",
             "name": "x-latitude",
@@ -24,7 +33,7 @@
               "type": "number"
             },
             "description": "Latitude value for location",
-            "required": false
+            "required": true
           },
           {
             "in": "header",
@@ -33,39 +42,26 @@
               "type": "number"
             },
             "description": "Longitude value for location",
-            "required": false
-          },
-          {
-            "in": "header",
-            "name": "x-weather-code",
-            "schema": {
-              "type": "string"
-            },
-            "description": "Weather Location code. Commonly used by The Weather Channel, Yahoo! Weather and AOL Weather",
             "required": true
           },
           {
             "in": "header",
-            "required": true,
-            "name": "x-api-token",
-            "description": "Access token",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "in": "header",
-            "required": true,
             "name": "x-unit",
-            "description": "unit of measure to use for temperature and distance",
+            "required": false,
+            "description": "System of measurement to use",
             "schema": {
-              "type": "string"
+              "type": "string",
+              "enum": [
+                "DEFAULT",
+                "METRIC",
+                "IMPERIAL"
+              ]
             }
           }
         ],
         "responses": {
           "200": {
-            "description": "Weather data of the area",
+            "description": "Weather data for the location",
             "content": {
               "application/json": {
                 "schema": {
@@ -85,81 +81,113 @@
           "source": {
             "type": "string",
             "enum": [
-              "OWM"
+              "OWM (Open Weather Map)"
             ]
           },
           "current": {
             "type": "object",
             "properties": {
-              "condition": {
-                "type": "string"
+              "apparentTemp": {
+                "description": "The 'feels like' temperature",
+                "allOf": [
+                  {
+                    "$ref": "#/components/schemas/Temperature"
+                  }
+                ]
               },
               "description": {
-                "type": "object",
-                "properties": {
-                  "long": {
-                    "type": "string",
-                    "description": "Long description of the current weather"
-                  },
-                  "short": {
-                    "type": "string",
-                    "description": "Short succinct description of the current weather"
+                "type": "string",
+                "description": "Description of the current weather"
+              },
+              "dewPoint": {
+                "description": "The atmospheric temperature (varying according to pressure and humidity) below which water droplets begin to condense and dew can form",
+                "allOf": [
+                  {
+                    "$ref": "#/components/schemas/Temperature"
                   }
-                }
-              },
-              "temp": {
-                "$ref": "#/components/schemas/Temperature"
-              },
-              "feelsLike": {
-                "$ref": "#/components/schemas/Temperature"
-              },
-              "pressure": {
-                "type": "object",
-                "properties": {
-                  "value": {
-                    "type": "number",
-                    "description": "Numeric value of the atmospheric pressure"
-                  },
-                  "unit": {
-                    "type": "string"
-                  }
-                }
-              },
-              "windspeed": {
-                "$ref": "#/components/schemas/Windspeed"
-              },
-              "visibility": {
-                "type": "object",
-                "properties": {
-                  "value": {
-                    "type": "number",
-                    "description": "Numeric value of the distance, to a hundredths precision."
-                  },
-                  "unit": {
-                    "type": "string"
-                  }
-                }
+                ]
               },
               "humidity": {
                 "type": "number",
-                "description": "Numeric value of the humidity percent, to a hundredths precision."
+                "description": "Numeric value of the humidity percent, to a hundredths precision"
+              },
+              "icon": {
+                "type": "string",
+                "description": "Key for the weather icon to use",
+                "enum": [
+                  "CLEAR_DAY",
+                  "CLEAR_NIGHT",
+                  "CLOUDY",
+                  "FOG",
+                  "PARTLY_CLOUDY_DAY",
+                  "PARTLY_CLOUDY_NIGHT",
+                  "RAIN",
+                  "SLEET",
+                  "SNOW",
+                  "WIND"
+                ]
+              },
+              "pressure": {
+                "$ref": "#/components/schemas/Pressure"
+              },
+              "summary": {
+                "type": "string",
+                "description": "Brief (1-2 word) summery of the current weather"
+              },
+              "temp": {
+                "description": "The current temperature",
+                "allOf": [
+                  {
+                    "$ref": "#/components/schemas/Temperature"
+                  }
+                ]
               },
               "uvIndex": {
                 "type": "number",
-                "description": "Numeric value of the current UV index, to a hundredths precision."
+                "description": "Numeric value of the current UV index, to a hundredths precision"
               },
-              "dewPoint": {
-                "decription": "The atmospheric temperature (varying according to pressure and humidity) below which water droplets begin to condense and dew can form.",
-                "$ref": "#/components/schemas/Temperature"
+              "visibility": {
+                "$ref": "#/components/schemas/Visibility"
+              },
+              "windspeed": {
+                "$ref": "#/components/schemas/WindSpeed"
               }
             }
           },
           "daily": {
             "type": "array",
-            "description": "Array of daily max and min temps, starting with today.",
+            "description": "Array of daily weather data, starting with today",
             "items": {
-              "$ref": "#/components/schemas/Forecast"
+              "type": "object",
+              "properties": {
+                "temp": {
+                  "type": "object",
+                  "description": "The daily temperature data",
+                  "properties": {
+                    "min": {
+                      "$ref": "#/components/schemas/Temperature"
+                    },
+                    "max": {
+                      "$ref": "#/components/schemas/Temperature"
+                    }
+                  }
+                }
+              }
             }
+          }
+        }
+      },
+      "Pressure": {
+        "properties": {
+          "value": {
+            "type": "number",
+            "description": "Numeric value of the atmospheric pressure, to a hundredths position"
+          },
+          "unit": {
+            "type": "string",
+            "enum": [
+              "MB (Millibar - DEFAULT)"
+            ]
           }
         }
       },
@@ -167,19 +195,34 @@
         "properties": {
           "value": {
             "type": "number",
-            "description": "Numeric value of the temperature, to a hundredths precision."
+            "description": "Numeric value of the temperature, to a hundredths precision"
           },
           "unit": {
             "type": "string",
             "enum": [
-              "kelvin",
-              "metric",
-              "imperial"
+              "K (Kelvin - DEFAULT)",
+              "C (Celsius - METRIC)",
+              "F (Fahrenheit - IMPERIAL)"
             ]
           }
         }
       },
-      "Windspeed": {
+      "Visibility": {
+        "properties": {
+          "value": {
+            "type": "number",
+            "description": "Numeric value of the visibility distance, to a hundredths precision"
+          },
+          "unit": {
+            "type": "string",
+            "enum": [
+              "M (Meters - DEFAULT, METRIC)",
+              "MI (Miles - IMPERIAL)"
+            ]
+          }
+        }
+      },
+      "WindSpeed": {
         "properties": {
           "direction": {
             "type": "string",
@@ -190,17 +233,11 @@
             "description": "Magnitude of the wind speed"
           },
           "unit": {
-            "type": "string"
-          }
-        }
-      },
-      "Forecast": {
-        "properties": {
-          "min": {
-            "$ref": "#/components/schemas/Temperature"
-          },
-          "max": {
-            "$ref": "#/components/schemas/Temperature"
+            "type": "string",
+            "enum": [
+              "MS (Meters per second - DEFAULT, METRIC)",
+              "MPH (Miles per hour - IMPERIAL)"
+            ]
           }
         }
       }

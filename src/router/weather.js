@@ -12,43 +12,67 @@ const APP_ID = process.env.OWM_KEY;
 
 const capitalize = (s) => s && s[0].toUpperCase() + s.slice(1);
 
-const velocityUnit = (system) => (system === 'imperial' ? 'mph' : 'm/s');
+const getWeatherIconOWM = (conditionCode) => {
+  if (conditionCode >= 200 && conditionCode < 600) {
+    return 'RAIN';
+  }
+  if (conditionCode >= 600 && conditionCode < 611) {
+    return 'SNOW';
+  }
+  if (conditionCode >= 611 && conditionCode < 700) {
+    return 'SLEET';
+  }
+  if (conditionCode >= 701 && conditionCode < 771) {
+    return 'FOG';
+  }
+  if (conditionCode >= 771 && conditionCode < 800) {
+    return 'WIND';
+  }
+  if (conditionCode === 800) {
+    // CLEAR_NIGHT
+    return 'CLEAR_DAY';
+  }
+  if (conditionCode >= 801 && conditionCode < 803) {
+    // PARTLY_CLOUDY_NIGHT
+    return 'PARTLY_CLOUDY_DAY';
+  }
+  if (conditionCode >= 803 && conditionCode < 900) {
+    return 'CLOUDY';
+  }
+  return 'CLOUDY';
+};
 
 const tempUnit = (system) => {
   switch (system) {
-    case 'imperial':
-      return '°F';
+    case 'IMPERIAL':
+      return 'F';
     case 'metric':
-      return '°C';
+      return 'C';
     default:
       return 'K';
   }
 };
 
-const distanceFromMeters = (system, distance) => {
-  switch (system) {
-    case 'imperial':
-      return Number.parseFloat(0.00062137119223733 * distance).toPrecision(2);
-    default:
-      return distance;
-  }
-}
+const visibilityUnit = (system) => (system === 'IMPERIAL' ? 'MI' : 'M');
 
-const distanceUnit = (system) => {
+const visibilityValue = (system, value) => {
   switch (system) {
     case 'imperial':
-      return 'mi';
+      // Convert from meters to miles
+      return Number.parseFloat(0.00062137119223733 * value).toPrecision(2);
     default:
-      return 'm';
+      return value;
   }
-}
+};
+
+const windSpeedUnit = (system) => (system === 'IMPERIAL' ? 'MPH' : 'MS');
 
 const wrapOWM = (data, unit) => ({
   current: {
-    condition: data.current.weather[0].id,
+    icon: getWeatherIconOWM(data.current.weather[0].id),
     description: capitalize(data.current.weather[0].description),
-    descriptionShort: data.current.weather[0].main,
-    feelsLike: {
+    summary: data.current.weather[0].main,
+    apparentTemp: {
       value: Number.parseFloat(data.current.feels_like).toPrecision(2),
       unit: tempUnit(unit),
     },
@@ -59,17 +83,17 @@ const wrapOWM = (data, unit) => ({
     windspeed: {
       magnitude: Number.parseFloat(data.current.wind_speed),
       direction: data.current.wind_deg,
-      unit: velocityUnit(unit),
+      unit: windSpeedUnit(unit),
     },
     humidity: Number.parseFloat(data.current.humidity).toPrecision(2),
     pressure: {
       value: data.current.pressure,
-      unit: 'hPa'
+      unit: 'MB',
     },
     uvIndex: Number.parseFloat(data.current.uvi),
     visibility: {
-      value: distanceFromMeters(unit, Number.parseFloat(data.current.visibility)),
-      unit: distanceUnit(unit)
+      value: visibilityValue(unit, Number.parseFloat(data.current.visibility).toPrecision(2)),
+      unit: visibilityUnit(unit),
     },
     dewPoint: {
       value: Number.parseFloat(data.current.dew_point),
@@ -79,13 +103,15 @@ const wrapOWM = (data, unit) => ({
   daily: [].concat(data.daily.map(({ temp }) => {
     const { max, min } = temp;
     return {
-      max: {
-        unit: tempUnit(unit),
-        value: max,
-      },
-      min: {
-        unit: tempUnit(unit),
-        value: min,
+      temp: {
+        max: {
+          unit: tempUnit(unit),
+          value: max,
+        },
+        min: {
+          unit: tempUnit(unit),
+          value: min,
+        },
       },
     };
   })),
@@ -94,13 +120,11 @@ const wrapOWM = (data, unit) => ({
 router.get('/', async (req, res) => {
   // get lat/lon and request data from sources based on location
 
-  const unit = req.header('x-unit') || 'imperial';
-
+  const unit = req.header('x-unit') || 'DEFAULT';
   const lat = req.header('x-latitude');
   const lon = req.header('x-longitude');
-  const locCd = req.header('x-weather-code');
 
-  if ((!lat || !lon) && !locCd) return res.json({ error: 'Bad request, either latitude and longitude or weather location code are required.', code: 400 });
+  if (!lat || !lon) return res.json({ error: 'Bad request, either latitude and longitude or weather location code are required.', code: 400 });
 
   let data;
   if (lat && lon) {
