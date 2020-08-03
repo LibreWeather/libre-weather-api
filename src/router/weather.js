@@ -12,7 +12,8 @@ const APP_ID = process.env.OWM_KEY;
 
 const capitalize = (s) => s && s[0].toUpperCase() + s.slice(1);
 
-const getWeatherIconOWM = (conditionCode) => {
+const getWeatherIconOWM = (conditionCode, currentTime, sunrise, sunset) => {
+  const isDay = currentTime >= sunrise && currentTime < sunset;
   if (conditionCode >= 200 && conditionCode < 600) {
     return 'RAIN';
   }
@@ -29,12 +30,10 @@ const getWeatherIconOWM = (conditionCode) => {
     return 'WIND';
   }
   if (conditionCode === 800) {
-    // CLEAR_NIGHT
-    return 'CLEAR_DAY';
+    return isDay ? 'CLEAR_DAY' : 'CLEAR_NIGHT';
   }
   if (conditionCode >= 801 && conditionCode < 803) {
-    // PARTLY_CLOUDY_NIGHT
-    return 'PARTLY_CLOUDY_DAY';
+    return isDay ? 'PARTLY_CLOUDY_DAY' : 'PARTLY_CLOUDY_NIGHT';
   }
   if (conditionCode >= 803 && conditionCode < 900) {
     return 'CLOUDY';
@@ -69,7 +68,8 @@ const windSpeedUnit = (system) => (system === 'IMPERIAL' ? 'MPH' : 'MS');
 
 const wrapOWM = (data, unit) => ({
   current: {
-    icon: getWeatherIconOWM(data.current.weather[0].id),
+    icon: getWeatherIconOWM(data.current.weather[0].id,
+      data.current.dt, data.current.sunrise, data.current.sunset),
     description: capitalize(data.current.weather[0].description),
     summary: data.current.weather[0].main,
     apparentTemp: {
