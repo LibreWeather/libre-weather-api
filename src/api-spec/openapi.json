@@ -95,6 +95,9 @@
                   }
                 ]
               },
+              "condition": {
+                "$ref": "#/components/schemas/Condition"
+              },
               "description": {
                 "type": "string",
                 "description": "Description of the current weather"
@@ -110,22 +113,6 @@
               "humidity": {
                 "type": "number",
                 "description": "Numeric value of the humidity percent, to a hundredths precision"
-              },
-              "icon": {
-                "type": "string",
-                "description": "Key for the weather icon to use",
-                "enum": [
-                  "CLEAR_DAY",
-                  "CLEAR_NIGHT",
-                  "CLOUDY",
-                  "FOG",
-                  "PARTLY_CLOUDY_DAY",
-                  "PARTLY_CLOUDY_NIGHT",
-                  "RAIN",
-                  "SLEET",
-                  "SNOW",
-                  "WIND"
-                ]
               },
               "pressure": {
                 "$ref": "#/components/schemas/Pressure"
@@ -174,8 +161,39 @@
                 }
               }
             }
+          },
+          "hourly": {
+            "type": "array",
+            "description": "Array of hourly weather data, starting with the current hour",
+            "items": {
+              "type": "object",
+              "properties": {
+                "temp": {
+                  "$ref": "#/components/schemas/Temperature"
+                },
+                "condition": {
+                  "$ref": "#/components/schemas/Condition"
+                }
+              }
+            }
           }
         }
+      },
+      "Condition": {
+        "type": "string",
+        "description": "The weather condition value",
+        "enum": [
+          "CLEAR_DAY",
+          "CLEAR_NIGHT",
+          "CLOUDY",
+          "FOG",
+          "PARTLY_CLOUDY_DAY",
+          "PARTLY_CLOUDY_NIGHT",
+          "RAIN",
+          "SLEET",
+          "SNOW",
+          "WIND"
+        ]
       },
       "Pressure": {
         "properties": {

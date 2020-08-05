@@ -12,7 +12,7 @@ const APP_ID = process.env.OWM_KEY;
 
 const capitalize = (s) => s && s[0].toUpperCase() + s.slice(1);
 
-const getWeatherIconOWM = (conditionCode, currentTime, sunrise, sunset) => {
+const getWeatherConditionOWM = (conditionCode, currentTime, sunrise, sunset) => {
   const isDay = currentTime >= sunrise && currentTime < sunset;
   if (conditionCode >= 200 && conditionCode < 600) {
     return 'RAIN';
@@ -68,7 +68,7 @@ const windSpeedUnit = (system) => (system === 'IMPERIAL' ? 'MPH' : 'MS');
 
 const wrapOWM = (data, unit) => ({
   current: {
-    icon: getWeatherIconOWM(data.current.weather[0].id,
+    condition: getWeatherConditionOWM(data.current.weather[0].id,
       data.current.dt, data.current.sunrise, data.current.sunset),
     description: capitalize(data.current.weather[0].description),
     summary: data.current.weather[0].main,
@@ -115,6 +115,14 @@ const wrapOWM = (data, unit) => ({
       },
     };
   })),
+  hourly: [].concat(data.hourly.map(({ dt, temp, weather }) => ({
+    temp: {
+      unit: tempUnit(unit),
+      value: temp,
+    },
+    condition: getWeatherConditionOWM(weather.id,
+      dt, data.current.sunrise, data.current.sunset),
+  }))),
 });
 
 router.get('/', async (req, res) => {
