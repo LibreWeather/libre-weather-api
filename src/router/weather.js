@@ -120,7 +120,7 @@ const wrapOWM = (data, unit) => ({
       unit: tempUnit(unit),
       value: temp,
     },
-    condition: getWeatherConditionOWM(weather.id,
+    condition: getWeatherConditionOWM(weather[0].id,
       dt, data.current.sunrise, data.current.sunset),
   }))),
 });

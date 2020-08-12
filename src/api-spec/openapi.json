@@ -164,7 +164,7 @@
           },
           "hourly": {
             "type": "array",
-            "description": "Array of hourly weather data, starting with the current hour",
+            "description": "Array of hourly weather data for the next 48 hours, starting with the current hour",
             "items": {
               "type": "object",
               "properties": {
