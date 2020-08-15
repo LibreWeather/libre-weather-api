@@ -74,7 +74,10 @@
     "printWidth": 120
   },
   "eslintConfig": {
-    "extends": ["airbnb-base", "plugin:prettier/recommended"],
+    "extends": [
+      "airbnb-base",
+      "plugin:prettier/recommended"
+    ],
     "parserOptions": {
       "sourceType": "script"
     },
