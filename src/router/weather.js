@@ -68,8 +68,12 @@ const windSpeedUnit = (system) => (system === 'IMPERIAL' ? 'MPH' : 'MS');
 
 const wrapOWM = (data, unit) => ({
   current: {
-    condition: getWeatherConditionOWM(data.current.weather[0].id,
-      data.current.dt, data.current.sunrise, data.current.sunset),
+    condition: getWeatherConditionOWM(
+      data.current.weather[0].id,
+      data.current.dt,
+      data.current.sunrise,
+      data.current.sunset
+    ),
     description: capitalize(data.current.weather[0].description),
     summary: data.current.weather[0].main,
     apparentTemp: {
@@ -100,44 +104,55 @@ const wrapOWM = (data, unit) => ({
       unit: tempUnit(unit),
     },
   },
-  daily: [].concat(data.daily.map(({ temp }) => {
-    const { max, min } = temp;
-    return {
+  daily: [].concat(
+    data.daily.map(({ temp }) => {
+      const { max, min } = temp;
+      return {
+        temp: {
+          max: {
+            unit: tempUnit(unit),
+            value: max,
+          },
+          min: {
+            unit: tempUnit(unit),
+            value: min,
+          },
+        },
+      };
+    })
+  ),
+  hourly: [].concat(
+    data.hourly.map(({ dt, temp, weather }) => ({
       temp: {
-        max: {
-          unit: tempUnit(unit),
-          value: max,
-        },
-        min: {
-          unit: tempUnit(unit),
-          value: min,
-        },
+        unit: tempUnit(unit),
+        value: temp,
       },
-    };
-  })),
-  hourly: [].concat(data.hourly.map(({ dt, temp, weather }) => ({
-    temp: {
-      unit: tempUnit(unit),
-      value: temp,
-    },
-    condition: getWeatherConditionOWM(weather[0].id,
-      dt, data.current.sunrise, data.current.sunset),
-  }))),
+      condition: getWeatherConditionOWM(weather[0].id, dt, data.current.sunrise, data.current.sunset),
+    }))
+  ),
 });
 
 router.get('/', async (req, res) => {
+  if (!APP_ID) res.sendStatus(500);
+
   // get lat/lon and request data from sources based on location
 
   const unit = req.header('x-unit') || 'DEFAULT';
   const lat = req.header('x-latitude');
   const lon = req.header('x-longitude');
 
-  if (!lat || !lon) return res.json({ error: 'Bad request, either latitude and longitude or weather location code are required.', code: 400 });
+  if (!lat || !lon) {
+    return res.json({
+      error: 'Bad request, either latitude and longitude or weather location code are required.',
+      code: 400,
+    });
+  }
 
   let data;
   if (lat && lon) {
-    data = await fetch(`${OPEN_WEATHER_ROOT}?lat=${lat}&lon=${lon}&appid=${APP_ID}&units=${unit}`)
-      .then((weather) => weather.json());
+    data = await fetch(`${OPEN_WEATHER_ROOT}?lat=${lat}&lon=${lon}&appid=${APP_ID}&units=${unit}`).then((weather) =>
+      weather.json()
+    );
   }
 
   if (data) {

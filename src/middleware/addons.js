@@ -21,7 +21,10 @@ const cache = require('apicache').options({
 const spec = require('../api-spec/openapi.json');
 
 // Some dependency/config stuff
-const adminCred = { user: process.env.ADMIN_USER, pass: process.env.ADMIN_PASS };
+const adminCred = {
+  user: process.env.ADMIN_USER,
+  pass: process.env.ADMIN_PASS,
+};
 const isProd = process.env.NODE_ENV === 'production';
 
 const initSecurity = (app) => {
@@ -31,7 +34,7 @@ const initSecurity = (app) => {
 
 const initSwagger = (app) => {
   // eslint-disable-next-line max-len
-  const swaggerAuth = (req, user, pass) => (!isProd || (user === adminCred.user && pass === adminCred.pass));
+  const swaggerAuth = (req, user, pass) => !isProd || (user === adminCred.user && pass === adminCred.pass);
   const swaggConfig = {
     swaggerSpec: spec,
     uriPath: '/meta/status',
@@ -40,7 +43,13 @@ const initSwagger = (app) => {
   };
   app.use(swagger.getMiddleware(swaggConfig));
 
-  app.use('/docs', swaggerui.serve, swaggerui.setup(spec, { customCss: '.swagger-ui .topbar { display: none }' }));
+  app.use(
+    '/docs',
+    swaggerui.serve,
+    swaggerui.setup(spec, {
+      customCss: '.swagger-ui .topbar { display: none }',
+    })
+  );
 };
 
 const init = (app) => {
