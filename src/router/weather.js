@@ -45,7 +45,7 @@ const tempUnit = (system) => {
   switch (system) {
     case 'IMPERIAL':
       return 'F';
-    case 'metric':
+    case 'METRIC':
       return 'C';
     default:
       return 'K';
@@ -56,7 +56,7 @@ const visibilityUnit = (system) => (system === 'IMPERIAL' ? 'MI' : 'M');
 
 const visibilityValue = (system, value) => {
   switch (system) {
-    case 'imperial':
+    case 'IMPERIAL':
       // Convert from meters to miles
       return Number.parseFloat(0.00062137119223733 * value).toPrecision(2);
     default:
