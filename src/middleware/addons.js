@@ -13,8 +13,10 @@ const cache = require('apicache').options({
   appendKey: (req) => {
     const lat = req.header('x-latitude');
     const lon = req.header('x-longitude');
+    const units = req.header('x-unit');
     const locCd = req.header('x-weather-code');
-    return `${req.path}-${lat}-${lon}-${locCd}`;
+    const key = `${req.path}-${units}-${lat}-${lon}-${locCd}`;
+    return key;
   },
 }).middleware;
 

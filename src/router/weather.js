@@ -150,9 +150,8 @@ router.get('/', async (req, res) => {
 
   let data;
   if (lat && lon) {
-    data = await fetch(`${OPEN_WEATHER_ROOT}?lat=${lat}&lon=${lon}&appid=${APP_ID}&units=${unit}`).then((weather) =>
-      weather.json()
-    );
+    const bundle = `${OPEN_WEATHER_ROOT}?lat=${lat}&lon=${lon}&appid=${APP_ID}&units=${unit}`;
+    data = await fetch(bundle).then((weather) => weather.json());
   }
 
   if (data) {
