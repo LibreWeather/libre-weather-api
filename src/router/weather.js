@@ -68,6 +68,10 @@ const windSpeedUnit = (system) => (system === 'IMPERIAL' ? 'MPH' : 'MS');
 
 const wrapOWM = (data, unit) => ({
   current: {
+    apparentTemp: {
+      value: Number.parseFloat(data.current.feels_like).toPrecision(2),
+      unit: tempUnit(unit),
+    },
     condition: getWeatherConditionOWM(
       data.current.weather[0].id,
       data.current.dt,
@@ -75,33 +79,32 @@ const wrapOWM = (data, unit) => ({
       data.current.sunset
     ),
     description: capitalize(data.current.weather[0].description),
-    summary: data.current.weather[0].main,
-    apparentTemp: {
-      value: Number.parseFloat(data.current.feels_like).toPrecision(2),
+    dewPoint: {
+      value: Number.parseFloat(data.current.dew_point),
       unit: tempUnit(unit),
-    },
-    temp: {
-      value: Number.parseFloat(data.current.temp).toPrecision(2),
-      unit: tempUnit(unit),
-    },
-    windspeed: {
-      magnitude: Number.parseFloat(data.current.wind_speed),
-      direction: data.current.wind_deg,
-      unit: windSpeedUnit(unit),
     },
     humidity: Number.parseFloat(data.current.humidity).toPrecision(2),
     pressure: {
       value: data.current.pressure,
       unit: 'MB',
     },
+    summary: data.current.weather[0].main,
+    sunrise: data.current.sunrise,
+    sunset: data.current.sunset,
+    temp: {
+      value: Number.parseFloat(data.current.temp).toPrecision(2),
+      unit: tempUnit(unit),
+    },
+    time: data.current.dt,
     uvIndex: Number.parseFloat(data.current.uvi),
     visibility: {
       value: visibilityValue(unit, Number.parseFloat(data.current.visibility).toPrecision(2)),
       unit: visibilityUnit(unit),
     },
-    dewPoint: {
-      value: Number.parseFloat(data.current.dew_point),
-      unit: tempUnit(unit),
+    windspeed: {
+      magnitude: Number.parseFloat(data.current.wind_speed),
+      direction: data.current.wind_deg,
+      unit: windSpeedUnit(unit),
     },
   },
   daily: [].concat(
@@ -123,11 +126,12 @@ const wrapOWM = (data, unit) => ({
   ),
   hourly: [].concat(
     data.hourly.map(({ dt, temp, weather }) => ({
+      condition: getWeatherConditionOWM(weather[0].id, dt, data.current.sunrise, data.current.sunset),
       temp: {
         unit: tempUnit(unit),
         value: temp,
       },
-      condition: getWeatherConditionOWM(weather[0].id, dt, data.current.sunrise, data.current.sunset),
+      time: dt,
     }))
   ),
 });

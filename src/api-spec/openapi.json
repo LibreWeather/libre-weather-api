@@ -51,7 +51,11 @@
             "description": "System of measurement to use",
             "schema": {
               "type": "string",
-              "enum": ["DEFAULT", "METRIC", "IMPERIAL"]
+              "enum": [
+                "DEFAULT",
+                "METRIC",
+                "IMPERIAL"
+              ]
             }
           }
         ],
@@ -76,7 +80,9 @@
         "properties": {
           "source": {
             "type": "string",
-            "enum": ["OWM (Open Weather Map)"]
+            "enum": [
+              "OWM (Open Weather Map)"
+            ]
           },
           "current": {
             "type": "object",
@@ -115,6 +121,14 @@
                 "type": "string",
                 "description": "Brief (1-2 word) summery of the current weather"
               },
+              "sunrise": {
+                "type": "number",
+                "description": "The time of sunrise in seconds. Unix time, UTC."
+              },
+              "sunset": {
+                "type": "number",
+                "description": "The time of sunset in seconds. Unix time, UTC."
+              },
               "temp": {
                 "description": "The current temperature",
                 "allOf": [
@@ -122,6 +136,10 @@
                     "$ref": "#/components/schemas/Temperature"
                   }
                 ]
+              },
+              "time": {
+                "type": "number",
+                "description": "The current time in seconds. Unix time, UTC."
               },
               "uvIndex": {
                 "type": "number",
@@ -162,11 +180,15 @@
             "items": {
               "type": "object",
               "properties": {
+                "condition": {
+                  "$ref": "#/components/schemas/Condition"
+                },
                 "temp": {
                   "$ref": "#/components/schemas/Temperature"
                 },
-                "condition": {
-                  "$ref": "#/components/schemas/Condition"
+                "time": {
+                  "type": "number",
+                  "description": "The time in seconds. Unix time, UTC."
                 }
               }
             }
@@ -197,7 +219,9 @@
           },
           "unit": {
             "type": "string",
-            "enum": ["MB (Millibar - DEFAULT)"]
+            "enum": [
+              "MB (Millibar - DEFAULT)"
+            ]
           }
         }
       },
@@ -225,7 +249,10 @@
           },
           "unit": {
             "type": "string",
-            "enum": ["M (Meters - DEFAULT, METRIC)", "MI (Miles - IMPERIAL)"]
+            "enum": [
+              "M (Meters - DEFAULT, METRIC)",
+              "MI (Miles - IMPERIAL)"
+            ]
           }
         }
       },
