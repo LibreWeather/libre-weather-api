@@ -27,7 +27,7 @@ const adminCred = {
   user: process.env.ADMIN_USER,
   pass: process.env.ADMIN_PASS,
 };
-const isProd = process.env.NODE_ENV === 'production';
+const isProd = false; // process.env.NODE_ENV === 'production';
 
 const initSecurity = (app) => {
   app.use(cors());
