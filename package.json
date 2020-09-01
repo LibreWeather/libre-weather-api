@@ -115,5 +115,8 @@
       "no-case-declarations": "off",
       "import/order": "off"
     }
+  },
+  "engines": {
+    "node": "=14.9.0"
   }
 }
