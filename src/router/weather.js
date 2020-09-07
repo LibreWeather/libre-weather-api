@@ -12,8 +12,7 @@ const APP_ID = process.env.OWM_KEY;
 
 const capitalize = (s) => s && s[0].toUpperCase() + s.slice(1);
 
-const getWeatherConditionOWM = (conditionCode, currentTime, sunrise, sunset) => {
-  const isDay = currentTime >= sunrise && currentTime < sunset;
+const getWeatherConditionOWM = (conditionCode) => {
   if (conditionCode >= 200 && conditionCode < 600) {
     return 'RAIN';
   }
@@ -30,10 +29,10 @@ const getWeatherConditionOWM = (conditionCode, currentTime, sunrise, sunset) => 
     return 'WIND';
   }
   if (conditionCode === 800) {
-    return isDay ? 'CLEAR_DAY' : 'CLEAR_NIGHT';
+    return 'CLEAR';
   }
   if (conditionCode >= 801 && conditionCode < 803) {
-    return isDay ? 'PARTLY_CLOUDY_DAY' : 'PARTLY_CLOUDY_NIGHT';
+    return 'PARTLY_CLOUDY';
   }
   if (conditionCode >= 803 && conditionCode < 900) {
     return 'CLOUDY';
@@ -72,12 +71,7 @@ const wrapOWM = (data, unit) => ({
       value: Number.parseFloat(data.current.feels_like).toPrecision(2),
       unit: tempUnit(unit),
     },
-    condition: getWeatherConditionOWM(
-      data.current.weather[0].id,
-      data.current.dt,
-      data.current.sunrise,
-      data.current.sunset
-    ),
+    condition: getWeatherConditionOWM(data.current.weather[0].id),
     description: capitalize(data.current.weather[0].description),
     dewPoint: {
       value: Number.parseFloat(data.current.dew_point),
@@ -126,7 +120,7 @@ const wrapOWM = (data, unit) => ({
   ),
   hourly: [].concat(
     data.hourly.map(({ dt, temp, weather }) => ({
-      condition: getWeatherConditionOWM(weather[0].id, dt, data.current.sunrise, data.current.sunset),
+      condition: getWeatherConditionOWM(weather[0].id),
       temp: {
         unit: tempUnit(unit),
         value: temp,
