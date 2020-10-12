@@ -9,18 +9,12 @@ const helmet = require('helmet');
 const cors = require('cors');
 
 // caching
-const cache = require('apicache').options({
-  appendKey: (req) => {
-    const lat = req.header('x-latitude');
-    const lon = req.header('x-longitude');
-    const units = req.header('x-unit');
-    const locCd = req.header('x-weather-code');
-    const key = `${req.path}-${units}-${lat}-${lon}-${locCd}`;
-    return key;
-  },
-}).middleware;
+const cache = require('apicache').middleware;
 
-const spec = require('../api-spec/openapi.json');
+// yaml2json
+const y2j = require('yamljson');
+
+const spec = JSON.parse(y2j.convert('src/api-spec/openapi.yaml'));
 
 // Some dependency/config stuff
 const adminCred = {

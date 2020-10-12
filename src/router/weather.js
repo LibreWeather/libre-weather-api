@@ -130,15 +130,9 @@ const wrapOWM = (data, unit) => ({
   ),
 });
 
-router.get('/', async (req, res) => {
-  if (!APP_ID) res.sendStatus(500);
+const UNITS = { IMPERIAL: 'IMPERIAL', METRIC: 'METRIC', FREEDOM_UNITS: 'IMPERIAL', DEFAULT: 'DEFAULT' };
 
-  // get lat/lon and request data from sources based on location
-
-  const unit = req.header('x-unit') || 'DEFAULT';
-  const lat = req.header('x-latitude');
-  const lon = req.header('x-longitude');
-
+const getDataByLatLong = async (res, { lat, lon, unit }) => {
   if (!lat || !lon) {
     return res.json({
       error: 'Bad request, either latitude and longitude or weather location code are required.',
@@ -162,6 +156,39 @@ router.get('/', async (req, res) => {
   } else {
     return res.sendStatus(400).end();
   }
+};
+
+router.get('/', async (req, res) => {
+  if (!APP_ID) res.sendStatus(500);
+
+  // get lat/lon and request data from sources based on location
+  const unit = req.header('x-unit') || 'DEFAULT';
+  const lat = req.header('x-latitude');
+  const lon = req.header('x-longitude');
+
+  await getDataByLatLong(res, { lat, lon, units: unit });
+});
+
+router.get('/:lat,:lon/unit/:units', async (req, res) => {
+  if (!APP_ID) res.sendStatus(500);
+
+  // get lat/lon and request data from sources based on location
+  const unit = req.params.units;
+  const { lat } = req.params;
+  const { lon } = req.params;
+
+  await getDataByLatLong(res, { lat, lon, unit });
+});
+
+router.get('/:lat,:lon', async (req, res) => {
+  if (!APP_ID) res.sendStatus(500);
+
+  // get lat/lon and request data from sources based on location
+  const unit = UNITS.DEFAULT;
+  const { lat } = req.params;
+  const { lon } = req.params;
+
+  await getDataByLatLong(res, { lat, lon, unit });
 });
 
 module.exports = router;
