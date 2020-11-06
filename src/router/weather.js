@@ -102,9 +102,10 @@ const wrapOWM = (data, unit) => ({
     },
   },
   daily: [].concat(
-    data.daily.map(({ temp }) => {
+    data.daily.map(({ dt, temp, weather }) => {
       const { max, min } = temp;
       return {
+        condition: getWeatherConditionOWM(weather[0].id),
         temp: {
           max: {
             unit: tempUnit(unit),
@@ -115,6 +116,7 @@ const wrapOWM = (data, unit) => ({
             value: min,
           },
         },
+        time: dt,
       };
     })
   ),

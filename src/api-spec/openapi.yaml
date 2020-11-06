@@ -175,6 +175,8 @@ components:
           items:
             type: object
             properties:
+              condition:
+                $ref: '#/components/schemas/Condition'
               temp:
                 type: object
                 description: The daily temperature data
@@ -183,6 +185,9 @@ components:
                     $ref: '#/components/schemas/Temperature'
                   max:
                     $ref: '#/components/schemas/Temperature'
+              time:
+                type: number
+                description: 'The time in seconds. Unix time, UTC.'
         hourly:
           type: array
           description: 'Array of hourly weather data for the next 48 hours, starting with the current hour'
