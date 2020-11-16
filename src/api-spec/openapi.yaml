@@ -177,6 +177,23 @@ components:
             properties:
               condition:
                 $ref: '#/components/schemas/Condition'
+              description:
+                type: string
+                description: Description of the weather for the day
+              rainVolume:
+                description: The total volume of rain for the day. The value be null if no rain is forecasted.
+                allOf:
+                  - $ref: '#/components/schemas/Volume'
+              snowVolume:
+                description: The total volume of snow for the day. The value be null if no snow is forecasted.
+                allOf:
+                  - $ref: '#/components/schemas/Volume'
+              sunrise:
+                type: number
+                description: 'The time of sunrise in seconds. Unix time, UTC.'
+              sunset:
+                type: number
+                description: 'The time of sunset in seconds. Unix time, UTC.'
               temp:
                 type: object
                 description: The daily temperature data
@@ -256,3 +273,13 @@ components:
           enum:
             - 'MS (Meters per second - DEFAULT, METRIC)'
             - MPH (Miles per hour - IMPERIAL)
+    Volume:
+      properties:
+        value:
+          type: number
+          description: 'Numeric value of the volume, to a hundredths precision'
+        unit:
+          type: string
+          enum:
+            - MM (Millimeters - DEFAULT, METRIC)
+            - IN (Inches - IMPERIAL)

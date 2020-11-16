@@ -57,7 +57,19 @@ const visibilityValue = (system, value) => {
   switch (system) {
     case 'IMPERIAL':
       // Convert from meters to miles
-      return Number.parseFloat(0.00062137119223733 * value).toPrecision(2);
+      return Number.parseFloat(0.00062137119223733 * value).toFixed(2);
+    default:
+      return value;
+  }
+};
+
+const volumeUnit = (system) => (system === 'IMPERIAL' ? 'IN' : 'MM');
+
+const volumeValue = (system, value) => {
+  switch (system) {
+    case 'IMPERIAL':
+      // Convert from millimeters to inches
+      return Number.parseFloat(0.03937008 * value).toFixed(2);
     default:
       return value;
   }
@@ -68,7 +80,7 @@ const windSpeedUnit = (system) => (system === 'IMPERIAL' ? 'MPH' : 'MS');
 const wrapOWM = (data, unit) => ({
   current: {
     apparentTemp: {
-      value: Number.parseFloat(data.current.feels_like).toPrecision(2),
+      value: Number.parseFloat(data.current.feels_like).toFixed(2),
       unit: tempUnit(unit),
     },
     condition: getWeatherConditionOWM(data.current.weather[0].id),
@@ -77,7 +89,7 @@ const wrapOWM = (data, unit) => ({
       value: Number.parseFloat(data.current.dew_point),
       unit: tempUnit(unit),
     },
-    humidity: Number.parseFloat(data.current.humidity).toPrecision(2),
+    humidity: Number.parseFloat(data.current.humidity).toFixed(2),
     pressure: {
       value: data.current.pressure,
       unit: 'MB',
@@ -86,13 +98,13 @@ const wrapOWM = (data, unit) => ({
     sunrise: data.current.sunrise,
     sunset: data.current.sunset,
     temp: {
-      value: Number.parseFloat(data.current.temp).toPrecision(2),
+      value: Number.parseFloat(data.current.temp).toFixed(2),
       unit: tempUnit(unit),
     },
     time: data.current.dt,
     uvIndex: Number.parseFloat(data.current.uvi),
     visibility: {
-      value: visibilityValue(unit, Number.parseFloat(data.current.visibility).toPrecision(2)),
+      value: visibilityValue(unit, Number.parseFloat(data.current.visibility).toFixed(2)),
       unit: visibilityUnit(unit),
     },
     windspeed: {
@@ -102,10 +114,21 @@ const wrapOWM = (data, unit) => ({
     },
   },
   daily: [].concat(
-    data.daily.map(({ dt, temp, weather }) => {
+    data.daily.map(({ dt, rain, snow, sunrise, sunset, temp, weather }) => {
       const { max, min } = temp;
       return {
         condition: getWeatherConditionOWM(weather[0].id),
+        description: capitalize(weather[0].description),
+        rainVolume: {
+          unit: volumeUnit(unit),
+          value: rain == null ? null : volumeValue(unit, rain),
+        },
+        snowVolume: {
+          unit: volumeUnit(unit),
+          value: snow == null ? null : volumeValue(unit, snow),
+        },
+        sunrise,
+        sunset,
         temp: {
           max: {
             unit: tempUnit(unit),
