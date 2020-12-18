@@ -2,9 +2,8 @@ openapi: 3.0.3
 info:
   version: 0.0.0
   title: LibreWeather API
-  termsOfService: 'https://libreweather.com/terms/'
   contact:
-    email: tobiah@protonmail.com
+    email: admin@libreweather.com
   license:
     name: AGPL v3.0
     url: 'https://opensource.org/licenses/AGPL-3.0'
