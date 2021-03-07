@@ -1,0 +1,284 @@
+openapi: 3.0.3
+info:
+  version: 0.1.0
+  title: LibreWeather API
+  contact:
+    email: admin@libreweather.com
+  license:
+    name: AGPL v3.0
+    url: 'https://opensource.org/licenses/AGPL-3.0'
+paths:
+  /weather:
+    get:
+      deprecated: true
+      summary: Get the weather data for a given latitude and longitude.
+      parameters:
+        - in: header
+          name: x-libreweather-token
+          schema:
+            type: string
+          description: API Access token
+          required: false
+        - in: header
+          name: x-latitude
+          schema:
+            type: number
+          description: Latitude value for location
+          required: true
+        - in: header
+          name: x-longitude
+          schema:
+            type: number
+          description: Longitude value for location
+          required: true
+        - in: header
+          name: x-unit
+          required: false
+          description: System of measurement to use
+          schema:
+            type: string
+            enum:
+              - DEFAULT
+              - METRIC
+              - IMPERIAL
+      responses:
+        '200':
+          description: Weather data for the location
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Weather'
+  /weather/{lat},{lon}:
+    get:
+      summary: Get the weather data for a given latitude and longitude. Assumes a default measure (SI)
+      parameters:
+        - in: header
+          name: x-libreweather-token
+          schema:
+            type: string
+          description: API Access token
+          required: false
+        - in: path
+          name: lat
+          schema:
+            type: number
+          description: Latitude value for location
+          required: true
+        - in: path
+          name: lon
+          schema:
+            type: number
+          description: Longitude value for location
+          required: true
+      responses:
+        '200':
+          description: Weather data for the location
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Weather'
+  /weather/{lat},{lon}/units/{units}:
+    get:
+      summary: Get the weather data for a given latitude and longitude.
+      parameters:
+        - in: header
+          name: x-libreweather-token
+          schema:
+            type: string
+          description: API Access token
+          required: false
+        - in: path
+          name: lat
+          schema:
+            type: number
+          description: Latitude value for location
+          required: true
+        - in: path
+          name: lon
+          schema:
+            type: number
+          description: Longitude value for location
+          required: true
+        - in: path
+          name: units
+          required: true
+          description: System of measurement to use
+          schema:
+            type: string
+            enum:
+              - DEFAULT
+              - METRIC
+              - IMPERIAL
+      responses:
+        '200':
+          description: Weather data for the location
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Weather'
+components:
+  schemas:
+    Weather:
+      properties:
+        source:
+          type: string
+          enum:
+            - OWM (Open Weather Map)
+        current:
+          type: object
+          properties:
+            apparentTemp:
+              description: The 'feels like' temperature
+              allOf:
+                - $ref: '#/components/schemas/Temperature'
+            condition:
+              $ref: '#/components/schemas/Condition'
+            description:
+              type: string
+              description: Description of the current weather
+            dewPoint:
+              description: The atmospheric temperature (varying according to pressure and humidity) below which water droplets begin to condense and dew can form
+              allOf:
+                - $ref: '#/components/schemas/Temperature'
+            humidity:
+              type: number
+              description: 'Numeric value of the humidity percent, to a hundredths precision'
+            pressure:
+              $ref: '#/components/schemas/Pressure'
+            summary:
+              type: string
+              description: Brief (1-2 word) summery of the current weather
+            sunrise:
+              type: number
+              description: 'The time of sunrise in seconds. Unix time, UTC.'
+            sunset:
+              type: number
+              description: 'The time of sunset in seconds. Unix time, UTC.'
+            temp:
+              description: The current temperature
+              allOf:
+                - $ref: '#/components/schemas/Temperature'
+            time:
+              type: number
+              description: 'The current time in seconds. Unix time, UTC.'
+            uvIndex:
+              type: number
+              description: 'Numeric value of the current UV index, to a hundredths precision'
+            visibility:
+              $ref: '#/components/schemas/Visibility'
+            windspeed:
+              $ref: '#/components/schemas/WindSpeed'
+        daily:
+          type: array
+          description: 'Array of daily weather data, starting with today'
+          items:
+            type: object
+            properties:
+              condition:
+                $ref: '#/components/schemas/Condition'
+              description:
+                type: string
+                description: Description of the weather for the day
+              rainVolume:
+                description: The total volume of rain for the day. The value be null if no rain is forecasted.
+                allOf:
+                  - $ref: '#/components/schemas/Volume'
+              snowVolume:
+                description: The total volume of snow for the day. The value be null if no snow is forecasted.
+                allOf:
+                  - $ref: '#/components/schemas/Volume'
+              sunrise:
+                type: number
+                description: 'The time of sunrise in seconds. Unix time, UTC.'
+              sunset:
+                type: number
+                description: 'The time of sunset in seconds. Unix time, UTC.'
+              temp:
+                type: object
+                description: The daily temperature data
+                properties:
+                  min:
+                    $ref: '#/components/schemas/Temperature'
+                  max:
+                    $ref: '#/components/schemas/Temperature'
+              time:
+                type: number
+                description: 'The time in seconds. Unix time, UTC.'
+        hourly:
+          type: array
+          description: 'Array of hourly weather data for the next 48 hours, starting with the current hour'
+          items:
+            type: object
+            properties:
+              condition:
+                $ref: '#/components/schemas/Condition'
+              temp:
+                $ref: '#/components/schemas/Temperature'
+              time:
+                type: number
+                description: 'The time in seconds. Unix time, UTC.'
+    Condition:
+      type: string
+      description: The weather condition value
+      enum:
+        - CLEAR
+        - CLOUDY
+        - FOG
+        - PARTLY_CLOUDY
+        - RAIN
+        - SLEET
+        - SNOW
+        - WIND
+    Pressure:
+      properties:
+        value:
+          type: number
+          description: 'Numeric value of the atmospheric pressure, to a hundredths position'
+        unit:
+          type: string
+          enum:
+            - MB (Millibar - DEFAULT)
+    Temperature:
+      properties:
+        value:
+          type: number
+          description: 'Numeric value of the temperature, to a hundredths precision'
+        unit:
+          type: string
+          enum:
+            - K (Kelvin - DEFAULT)
+            - C (Celsius - METRIC)
+            - F (Fahrenheit - IMPERIAL)
+    Visibility:
+      properties:
+        value:
+          type: number
+          description: 'Numeric value of the visibility distance, to a hundredths precision'
+        unit:
+          type: string
+          enum:
+            - 'M (Meters - DEFAULT, METRIC)'
+            - MI (Miles - IMPERIAL)
+    WindSpeed:
+      properties:
+        direction:
+          type: string
+          description: Direction of the wind
+        magnitude:
+          type: string
+          description: Magnitude of the wind speed
+        unit:
+          type: string
+          enum:
+            - 'MS (Meters per second - DEFAULT, METRIC)'
+            - MPH (Miles per hour - IMPERIAL)
+    Volume:
+      properties:
+        value:
+          type: number
+          description: 'Numeric value of the volume, to a hundredths precision'
+        unit:
+          type: string
+          enum:
+            - MM (Millimeters - DEFAULT, METRIC)
+            - IN (Inches - IMPERIAL)

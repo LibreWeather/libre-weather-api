@@ -1,0 +1,55 @@
+{
+  "name": "libre-weather-api",
+  "description": "LibreWeather... API",
+  "keywords": [
+    "weather",
+    "api",
+    "json"
+  ],
+  "repository": "https://github.com/libreweather/libre-weather-api",
+  "website": "https://api.libreweather.com/docs",
+  "scripts": {
+  },
+  "env": {
+    "OWM_KEY": {
+      "description": "Open Weather Maps API Key",
+      "required": true
+    },
+    "SCOPE": {
+      "description": "Logger scope",
+      "value": "API",
+      "required": true
+    },
+    "LOG_LEVEL": {
+      "description": "Winston log level",
+      "value": "error"
+    },
+    "ADMIN_USER": {
+      "description": "Admin user username",
+      "value": "admin",
+      "required": true
+    },
+    "ADMIN_PASS": {
+      "description": "Admin user password",
+      "value": "password",
+      "required": true
+    },
+    "NODE_ENV": {
+      "description": "Node environment (production or development)",
+      "value": "production",
+      "required": true
+    }
+  },
+  "formation": {
+    "web": {
+      "quantity": 1,
+      "size": "free"
+    }
+  },
+  "addons": [],
+  "buildpacks": [
+    {
+      "url": "heroku/nodejs"
+    }
+  ]
+}

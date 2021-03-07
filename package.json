@@ -1,0 +1,122 @@
+{
+  "name": "libre-weather-api",
+  "version": "0.1.0",
+  "description": "Open Weather APIs for the Open Sky",
+  "main": "src/server.js",
+  "scripts": {
+    "test": "exit 0",
+    "start": "node src/server.js",
+    "dev": "nodemon --delay 5 --watch .env --watch src src/server.js",
+    "lint": "npx eslint src/.",
+    "lint:fix": "npx eslint src/. --fix"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/LibreWeather/libre-weather-api.git"
+  },
+  "keywords": [
+    "floss",
+    "open",
+    "weather"
+  ],
+  "author": "tobitenno",
+  "contributors": [
+    "jkuester"
+  ],
+  "license": "AGPL-3.0",
+  "bugs": {
+    "url": "https://github.com/LibreWeather/libre-weather-api/issues"
+  },
+  "homepage": "https://github.com/LibreWeather/libre-weather-api#readme",
+  "dependencies": {
+    "apicache": "^1.5.3",
+    "bcryptjs": "^2.4.3",
+    "colors": "^1.4.0",
+    "cors": "^2.8.5",
+    "express": "^4.17.1",
+    "express-favicon-short-circuit": "^1.2.0",
+    "helmet": "^3.23.3",
+    "jsonwebtoken": "^8.5.1",
+    "mongodb": "^3.5.9",
+    "mongoose": "^5.9.25",
+    "node-fetch": "^2.6.1",
+    "swagger-stats": "^0.95.17",
+    "swagger-ui-express": "^4.1.4",
+    "validator": "^13.1.1",
+    "winston": "^3.3.3",
+    "yamljson": "^1.0.70"
+  },
+  "devDependencies": {
+    "@types/apicache": "^1.2.2",
+    "@types/cors": "^2.8.6",
+    "@types/express": "^4.17.7",
+    "@types/helmet": "0.0.47",
+    "@types/swagger-stats": "^0.95.2",
+    "@types/swagger-ui-express": "^4.1.2",
+    "dotenv": "^8.2.0",
+    "eslint": "^7.5.0",
+    "eslint-config-airbnb-base": "^14.2.0",
+    "eslint-config-prettier": "^6.11.0",
+    "eslint-plugin-import": "^2.22.0",
+    "eslint-plugin-prettier": "^3.1.4",
+    "nodemon": "^2.0.4",
+    "prettier": "^2.0.5"
+  },
+  "prettier": {
+    "tabWidth": 2,
+    "singleQuote": true,
+    "trailingComma": "es5",
+    "semi": true,
+    "quoteProps": "as-needed",
+    "bracketSpacing": true,
+    "jsxBracketSameLine": true,
+    "arrowParens": "always",
+    "printWidth": 120
+  },
+  "eslintConfig": {
+    "extends": [
+      "airbnb-base",
+      "plugin:prettier/recommended"
+    ],
+    "parserOptions": {
+      "sourceType": "script"
+    },
+    "rules": {
+      "valid-jsdoc": [
+        "error",
+        {
+          "requireReturn": false,
+          "requireReturnDescription": false,
+          "preferType": {
+            "String": "string",
+            "Number": "number",
+            "Boolean": "boolean",
+            "Function": "function",
+            "object": "Object",
+            "date": "Date",
+            "error": "Error"
+          },
+          "prefer": {
+            "return": "returns"
+          }
+        }
+      ],
+      "no-underscore-dangle": "off",
+      "strict": [
+        "error",
+        "safe"
+      ],
+      "linebreak-style": "off",
+      "no-restricted-syntax": "off",
+      "no-await-in-loop": "off",
+      "global-require": "off",
+      "no-fallthrough": "off",
+      "no-param-reassign": "off",
+      "no-case-declarations": "off",
+      "import/order": "off"
+    }
+  },
+  "engines": {
+    "node": "=14.9.0"
+  }
+}
