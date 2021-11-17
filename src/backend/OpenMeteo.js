@@ -1,7 +1,7 @@
 'use strict';
 
 const fetch = require('node-fetch');
-const { logger, volume: Volume, visibility: Visibility, windspeed: WindSpeed, temp: Temperature } = require('../utils');
+const { volume: Volume, windspeed: WindSpeed, temp: Temperature } = require('../utils');
 
 module.exports = class OpenMeteo extends require('./Backend') {
   #ROOT = 'https://api.open-meteo.com/v1';
@@ -87,7 +87,6 @@ module.exports = class OpenMeteo extends require('./Backend') {
         sunset: new Date(data.daily.sunset[0]).getTime(),
         time: new Date(data.current_weather.time).getTime(),
         temp: new Temperature(data.current_weather.temperature, unit),
-        uvIndex: 0,
         visibility: { unit: '%', value: data.hourly?.cloudcover?.[0] },
         windspeed: new WindSpeed(data.current_weather.windspeed, data.current_weather.winddirection, unit),
       },
