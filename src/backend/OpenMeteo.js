@@ -1,14 +1,14 @@
 'use strict';
 
 const fetch = require('node-fetch');
-const { volume: Volume, visibility: Visibility, windspeed: WindSpeed, temp: Temperature } = require('../utils');
+const { logger, volume: Volume, visibility: Visibility, windspeed: WindSpeed, temp: Temperature } = require('../utils');
 
 module.exports = class OpenMeteo extends require('./Backend') {
   #ROOT = 'https://api.open-meteo.com/v1';
 
   #PARAMS = [
     'current_weather=true',
-    'hourly=temperature_2m,relativehumidity_2m,dewpoint_2m,apparent_temperature,pressure_msl',
+    'hourly=temperature_2m,relativehumidity_2m,dewpoint_2m,apparent_temperature,pressure_msl,weathercode,cloudcover',
     'daily=temperature_2m_max,temperature_2m_min,sunrise,sunset,weathercode,precipitation_sum',
   ];
 
@@ -66,12 +66,12 @@ module.exports = class OpenMeteo extends require('./Backend') {
     const unitParams = [
       `temperature_unit=${Temperature.longSystem(unit)}`,
       `windspeed_unit=${WindSpeed.mapUnit(unit).toLowerCase()}`,
-      `precipitation_unit=${Volume.mapUnit(unit).toLowerCase()}`,
+      `precipitation_unit=${Volume.longUnit(unit).toLowerCase()}`,
+      `timezone=${options.tz || 'UTC'}`,
     ];
     const url = `${this.#ROOT}/forecast?latitude=${lat}&longitude=${lon}&${this.#PARAMS.join('&')}&${unitParams.join(
       '&'
     )}`;
-
     return fetch(url).then((weather) => weather.json());
   }
 
@@ -79,16 +79,16 @@ module.exports = class OpenMeteo extends require('./Backend') {
     const mapped = {
       current: {
         apparentTemp: new Temperature(data.hourly.apparent_temperature?.[0], unit),
-        condition: this.#WMO(data.current_weather.weathercode),
+        condition: this.#WMO[data.current_weather.weathercode],
         dewPoint: new Temperature(data.hourly.dewpoint_2m?.[0], unit),
         humidity: Number.parseFloat(data.hourly.relativehumidity_2m?.[0], unit),
         pressure: { value: data.hourly.pressure_msl?.[0], unit: 'MB' },
-        sunrise: data.daily.sunrise[0],
-        sunset: data.daily.sunset[0],
-        time: data.current_weather.time,
+        sunrise: new Date(data.daily.sunrise[0]).getTime(),
+        sunset: new Date(data.daily.sunset[0]).getTime(),
+        time: new Date(data.current_weather.time).getTime(),
         temp: new Temperature(data.current_weather.temperature, unit),
-        uvIndex: '??',
-        visibility: { unit: Visibility.mapUnit(unit), value: '--' },
+        uvIndex: 0,
+        visibility: { unit: '%', value: data.hourly?.cloudcover?.[0] },
         windspeed: new WindSpeed(data.current_weather.windspeed, data.current_weather.winddirection, unit),
       },
       hourly: [],
@@ -97,23 +97,24 @@ module.exports = class OpenMeteo extends require('./Backend') {
 
     for (let hour = 0; hour < 168; hour += 1) {
       mapped.hourly[hour] = {
-        condition: this.#WMO(data.hourly.weathercode[hour]),
+        condition: this.#WMO[data.hourly.weathercode[hour]],
         temp: new Temperature(data.hourly.temperature_2m[hour], unit),
         time: 0,
       };
     }
     for (let day = 0; day < 7; day += 1) {
-      const condition = this.#WMO(data.daily.weathercode[day]);
+      const condition = this.#WMO[data.daily.weathercode[day]];
       mapped.daily[day] = {
         condition,
         description: '',
         rainVolume: new Volume(condition === 'RAIN' ? data.daily.precipitation_sum[day] : null, unit),
         snowVolume: new Volume(condition === 'SNOW' ? data.daily.precipitation_sum[day] : null, unit),
-        sunrise: data.daily.sunrise[day],
-        sunset: data.daily.sunset[day],
+        sunrise: new Date(data.daily.sunrise[day]).getTime(),
+        sunset: new Date(data.daily.sunset[day]).getTime(),
         temp: Temperature.range(data.daily.temperature_2m_min[day], data.daily.temperature_2m_max[day], unit),
         time: 0,
       };
     }
+    return mapped;
   }
 };

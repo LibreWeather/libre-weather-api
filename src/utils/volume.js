@@ -17,6 +17,15 @@ module.exports = class Volume {
   }
 
   /**
+   * Map a system to the long form of the unit
+   * @param {string} system system to map
+   * @returns {string}
+   */
+  static longUnit(system) {
+    return system === 'IMPERIAL' ? 'inch' : 'mm';
+  }
+
+  /**
    * Create a volume object with value and unit system
    * @param {string} value volume magnitude
    * @param {string} system system of measure

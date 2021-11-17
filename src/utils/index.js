@@ -10,5 +10,6 @@ module.exports = {
   windspeed: require('./windspeed'),
   volume: require('./volume'),
   backends: require('./backends'),
+  visibility: require('./visibility'),
   temp: require('./temp'),
 };

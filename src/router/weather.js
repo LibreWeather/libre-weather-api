@@ -6,6 +6,7 @@ const router = express.Router();
 
 const { logger, UNITS, backends } = require('../utils');
 const OpenWeatherMap = require('../backend/OpenWeatherMap');
+const OpenMeteo = require('../backend/OpenMeteo');
 
 let BACKEND;
 
@@ -15,13 +16,14 @@ let BACKEND;
       BACKEND = new OpenWeatherMap();
       break;
     case backends.METEO:
+      BACKEND = new OpenMeteo();
       break;
     default:
       break;
   }
 })();
 
-const getDataByLatLong = async (res, { lat, lon, unit }) => {
+const getDataByLatLong = async (res, { lat, lon, unit, tz }) => {
   if (!lat || !lon) {
     return res.json({
       error: 'Bad request, either latitude and longitude or weather location code are required.',
@@ -30,13 +32,14 @@ const getDataByLatLong = async (res, { lat, lon, unit }) => {
   }
 
   // fetch from OWM or Meteo depending on config
-  const data = await BACKEND.fetch(res, { lat, lon, unit });
+  const data = await BACKEND.fetch(res, { lat, lon, unit, tz });
   // serialize
   if (data) {
     try {
       return res.json(BACKEND.serialize(data, unit)).end();
     } catch (e) {
       logger.debug(e);
+      logger.debug(e.stack);
       return res.sendStatus(500).end();
     }
   } else {
@@ -51,8 +54,9 @@ router.get('/', async (req, res) => {
   const unit = req.header('x-unit') || 'DEFAULT';
   const lat = req.header('x-latitude');
   const lon = req.header('x-longitude');
+  const tz = req.header('x-tz');
 
-  await getDataByLatLong(res, { lat, lon, units: unit });
+  await getDataByLatLong(res, { lat, lon, unit, tz });
 });
 
 router.get('/:lat,:lon/unit/:units', async (req, res) => {
@@ -61,8 +65,9 @@ router.get('/:lat,:lon/unit/:units', async (req, res) => {
   // get lat/lon and request data from sources based on location
   const unit = req.params.units;
   const { lat, lon } = req.params;
+  const tz = req.header('x-tz');
 
-  await getDataByLatLong(res, { lat, lon, unit });
+  await getDataByLatLong(res, { lat, lon, unit, tz });
 });
 
 router.get('/:lat,:lon', async (req, res) => {
@@ -70,10 +75,10 @@ router.get('/:lat,:lon', async (req, res) => {
 
   // get lat/lon and request data from sources based on location
   const unit = UNITS.DEFAULT;
-  const { lat } = req.params;
-  const { lon } = req.params;
+  const { lat, lon } = req.params;
+  const tz = req.header('x-tz');
 
-  await getDataByLatLong(res, { lat, lon, unit });
+  await getDataByLatLong(res, { lat, lon, unit, tz });
 });
 
 module.exports = router;
