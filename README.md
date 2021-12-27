@@ -18,13 +18,11 @@ Swagger doc included at `/docs`.
 
 ### [OpenWeather](https://openweathermap.org/appid) Maps
 
-About: 
-
-Required Env Vars:
+#### Required Env Vars
 - `BACKEND=OWM`
 - `OWM_KEY=key-here`
 
 ### [Open-Meteo](https://open-meteo.com)
 
-Required Env Vars:
+#### Required Env Vars
 - `BACKEND=METEO`

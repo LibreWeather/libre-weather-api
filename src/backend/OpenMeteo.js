@@ -64,7 +64,7 @@ module.exports = class OpenMeteo extends require('./Backend') {
     super.fetch(res, options);
     const { lat, lon, unit } = options;
     const unitParams = [
-      `temperature_unit=${Temperature.longSystem(unit)}`,
+      `temperature_unit=${Temperature.longUnit(unit)}`,
       `windspeed_unit=${WindSpeed.mapUnit(unit).toLowerCase()}`,
       `precipitation_unit=${Volume.longUnit(unit).toLowerCase()}`,
       `timezone=${options.tz || 'UTC'}`,

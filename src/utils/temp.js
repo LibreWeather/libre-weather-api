@@ -12,7 +12,7 @@ module.exports = class Temperature {
    * @param {string} system what measurement system is used
    * @returns {string}
    */
-  static system = (system) => {
+  static mapUnit = (system) => {
     switch (system) {
       case 'IMPERIAL':
         return 'F';
@@ -28,7 +28,7 @@ module.exports = class Temperature {
    * @param {string} system system name
    * @returns {string}
    */
-  static longSystem = (system) => {
+  static longUnit = (system) => {
     switch (system) {
       case 'IMPERIAL':
         return 'fahrenheit';
@@ -66,6 +66,6 @@ module.exports = class Temperature {
    */
   constructor(value, system) {
     this.value = Number.parseFloat(value).toFixed(2);
-    this.unit = Temperature.system(system);
+    this.unit = Temperature.mapUnit(system);
   }
 };
