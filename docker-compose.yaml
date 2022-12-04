@@ -1,0 +1,10 @@
+version: '3.3'
+services:
+  api:
+    container_name: libreweather_api
+    image: libreweather/api
+    env_file: .env
+    restart: unless-stopped
+    network_mode: host
+    ports:
+      - '3000:3000'

@@ -43,9 +43,7 @@ const setup = (scope = 'PROC') => {
     ],
   });
 
-  if (process.env.NODE_ENV !== 'production') {
-    logger.add(consoleTransport);
-  }
+  logger.add(consoleTransport);
   return logger;
 };
 
