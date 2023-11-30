@@ -4,7 +4,7 @@ const express = require('express');
 
 const router = express.Router();
 
-const { logger, UNITS, backends } = require('../utils');
+const { logger, units, backends } = require('../utils');
 const OpenWeatherMap = require('../backend/OpenWeatherMap');
 const OpenMeteo = require('../backend/OpenMeteo');
 
@@ -59,12 +59,11 @@ router.get('/', async (req, res) => {
   await getDataByLatLong(res, { lat, lon, unit, tz });
 });
 
-router.get('/:lat,:lon/unit/:units', async (req, res) => {
+router.get('/:lat,:lon/unit/:unit', async (req, res) => {
   if (!BACKEND) res.sendStatus(503);
 
   // get lat/lon and request data from sources based on location
-  const unit = req.params.units;
-  const { lat, lon } = req.params;
+  const { lat, lon, unit } = req.params;
   const tz = req.header('x-tz');
 
   await getDataByLatLong(res, { lat, lon, unit, tz });
@@ -74,7 +73,7 @@ router.get('/:lat,:lon', async (req, res) => {
   if (!BACKEND) res.sendStatus(503);
 
   // get lat/lon and request data from sources based on location
-  const unit = UNITS.DEFAULT;
+  const unit = units.DEFAULT;
   const { lat, lon } = req.params;
   const tz = req.header('x-tz');
 

@@ -1,0 +1,34 @@
+name: Release
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        node-version: ['12', '14', '16', 'lts/*']
+    steps:
+      - uses: actions/checkout@v3
+      - name: Use Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v3
+        with:
+          node-version: ${{ matrix.node-version }}
+      - run: npm ci
+      - run: npm run lint
+# TODO: get this working
+#      - name: Release
+#        uses: cycjimmy/semantic-release-action@v3
+#        env:
+#          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+#          DOCKER_USERNAME: ${{ github.token }}
+#        with:
+#          semantic_version: 17
+#          extra_plugins: |
+#            @eclass/semantic-release-docker
+#            @semantic-release/git
+#            @semantic-release/changelog
+#            @semantic-release/exec

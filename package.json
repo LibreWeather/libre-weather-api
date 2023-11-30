@@ -134,5 +134,27 @@
   },
   "engines": {
     "node": "=14.9.0"
+  },
+  "release": {
+    "plugins": [
+      "@semantic-release/commit-analyzer",
+      "@semantic-release/release-notes-generator",
+      ["@semantic-release/npm", {
+        "npmPublish": false
+      }],
+      ["@semantic-release/github", {
+        "assets": ["package.json", "package-lock.json"]
+      }],
+      ["@semantic-release/exec", {
+        "prepareCmd": "docker build -t libreweather/libreweather-api ."
+      }],
+      ["@eclass/semantic-release-docker", {
+        "baseImageName": "libreweather-api",
+        "registries": [{
+          "url": "docker.pkg.github.com",
+          "imageName": "docker.pkg.github.com/libreweather/libreweather-api"
+        }]
+      }]
+    ]
   }
 }
