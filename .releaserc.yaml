@@ -1,0 +1,21 @@
+plugins:
+  - '@semantic-release/commit-analyzer'
+  - - '@semantic-release/exec'
+    - successCmd: echo 'yes' >> .release
+      failCmd: echo 'no' >> .release
+  - '@semantic-release/release-notes-generator'
+  - - '@semantic-release/npm'
+    - npmPublish: false
+  - '@semantic-release/github'
+  - - '@semantic-release/git'
+    - assets:
+        - package.json
+        - CHANGELOG.md
+  - - '@eclass/semantic-release-docker'
+    - baseImageName: libre-weather-api
+      registries:
+        - url: ghcr.io
+          imageName: ghcr.io/libreweather/libre-weather-api:latest
+          user: DOCKER_USERNAME
+          password: DOCKER_PASSWORD
+branches: main
