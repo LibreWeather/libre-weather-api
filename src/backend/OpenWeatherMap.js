@@ -91,7 +91,7 @@ module.exports = class OpenWeatherMap extends require('./Backend') {
         sunrise: data.current.sunrise,
         sunset: data.current.sunset,
         temp: new Temperature(data.current.temp, unit),
-        time: data.current.dt,
+        time: data.current.dt * 1000,
         uvIndex: Number.parseFloat(data.current.uvi),
         visibility: new Visibility(data.current.visibility, unit),
         windspeed: new WindSpeed(data.current.wind_speed, data.current.wind_deg, unit),
@@ -107,7 +107,7 @@ module.exports = class OpenWeatherMap extends require('./Backend') {
             sunrise,
             sunset,
             temp: Temperature.range(min, max, unit),
-            time: dt,
+            time: dt * 1000,
           };
         })
       ),
@@ -115,7 +115,7 @@ module.exports = class OpenWeatherMap extends require('./Backend') {
         data.hourly.map(({ dt, temp, weather }) => ({
           condition: OpenWeatherMap.#conditionCode(weather[0].id),
           temp: new Temperature(temp, unit),
-          time: dt,
+          time: dt * 1000,
         }))
       ),
     };
