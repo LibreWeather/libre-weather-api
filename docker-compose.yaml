@@ -2,7 +2,7 @@ version: '3.3'
 services:
   api:
     container_name: libreweather_api
-    image: libreweather/api
+    image: ghcr.io/libreweather/libre-weather-api:latest
     env_file: .env
     restart: unless-stopped
     network_mode: host
