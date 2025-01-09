@@ -68,7 +68,7 @@ module.exports = class OpenMeteo extends require('./Backend') {
       `temperature_unit=${Temperature.longUnit(unit)}`,
       `windspeed_unit=${WindSpeed.mapUnit(unit).toLowerCase()}`,
       `precipitation_unit=${Volume.longUnit(unit).toLowerCase()}`,
-      `timezone=${options.tz || 'UTC'}`,
+      `timezone=${options.tz || process.env.TZ}`,
     ];
     const url = `${this.#ROOT}/forecast?latitude=${lat}&longitude=${lon}&${this.#PARAMS.join('&')}&${unitParams.join(
       '&'
@@ -86,8 +86,8 @@ module.exports = class OpenMeteo extends require('./Backend') {
         dewPoint: new Temperature(data.hourly.dewpoint_2m?.[0], unit),
         humidity: Number.parseFloat(data.hourly.relativehumidity_2m?.[0], unit),
         pressure: { value: data.hourly.pressure_msl?.[0], unit: 'MB' },
-        sunrise: new Date(data.daily.sunrise[0]).getTime(),
-        sunset: new Date(data.daily.sunset[0]).getTime(),
+        sunrise: new Date(data.daily.sunrise[0]).getTime() - tzOffset,
+        sunset: new Date(data.daily.sunset[0]).getTime() - tzOffset,
         time: new Date(data.hourly.time[0]).getTime() - tzOffset,
         temp: new Temperature(data.current_weather.temperature, unit),
         visibility: { unit: '%', value: data.hourly?.cloudcover?.[0] },
@@ -101,7 +101,7 @@ module.exports = class OpenMeteo extends require('./Backend') {
       mapped.hourly[hour] = {
         condition: this.#WMO[data.hourly.weathercode[hour]],
         temp: new Temperature(data.hourly.temperature_2m[hour], unit),
-        time: new Date(data.hourly.time[hour]).getTime(),
+        time: new Date(data.hourly.time[hour]).getTime() - tzOffset,
       };
     }
     for (let day = 0; day < 7; day += 1) {
@@ -111,8 +111,8 @@ module.exports = class OpenMeteo extends require('./Backend') {
         description: '',
         rainVolume: new Volume(condition === 'RAIN' ? data.daily.precipitation_sum[day] : null, unit),
         snowVolume: new Volume(condition === 'SNOW' ? data.daily.precipitation_sum[day] : null, unit),
-        sunrise: new Date(data.daily.sunrise[day]).getTime(),
-        sunset: new Date(data.daily.sunset[day]).getTime(),
+        sunrise: new Date(data.daily.sunrise[day]).getTime() - tzOffset,
+        sunset: new Date(data.daily.sunset[day]).getTime() - tzOffset,
         temp: Temperature.range(data.daily.temperature_2m_min[day], data.daily.temperature_2m_max[day], unit),
         time: new Date(data.daily.time[day]).getTime() - tzOffset,
       };
