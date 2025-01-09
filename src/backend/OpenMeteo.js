@@ -1,9 +1,7 @@
 'use strict';
 
 const fetch = require('node-fetch');
-const { findTimeZone, getUTCOffset } = require('timezone-support');
 
-const logger = require('../utils/logger')('METEO');
 const { volume: Volume, windspeed: WindSpeed, temp: Temperature } = require('../utils');
 
 module.exports = class OpenMeteo extends require('./Backend') {
