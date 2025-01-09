@@ -1,3 +1,11 @@
+## [1.0.2](https://github.com/LibreWeather/libre-weather-api/compare/v1.0.1...v1.0.2) (2025-01-09)
+
+
+### Bug Fixes
+
+* calculate time w/ utc offset ([cd16848](https://github.com/LibreWeather/libre-weather-api/commit/cd16848acbff54381f436fb558505dee4595c7e9))
+* dockerfile labels in scope ([79acb91](https://github.com/LibreWeather/libre-weather-api/commit/79acb913cd5e83bd2b69e8793fb64e4b99cf64c8))
+
 ## [1.0.1](https://github.com/LibreWeather/libre-weather-api/compare/v1.0.0...v1.0.1) (2025-01-09)
 
 
