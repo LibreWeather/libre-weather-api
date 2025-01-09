@@ -85,7 +85,7 @@ module.exports = class OpenMeteo extends require('./Backend') {
         pressure: { value: data.hourly.pressure_msl?.[0], unit: 'MB' },
         sunrise: new Date(data.daily.sunrise[0]).getTime(),
         sunset: new Date(data.daily.sunset[0]).getTime(),
-        time: new Date(data.current_weather.time).getTime(),
+        time: new Date(data.hourly[0]).getTime(),
         temp: new Temperature(data.current_weather.temperature, unit),
         visibility: { unit: '%', value: data.hourly?.cloudcover?.[0] },
         windspeed: new WindSpeed(data.current_weather.windspeed, data.current_weather.winddirection, unit),
@@ -98,7 +98,7 @@ module.exports = class OpenMeteo extends require('./Backend') {
       mapped.hourly[hour] = {
         condition: this.#WMO[data.hourly.weathercode[hour]],
         temp: new Temperature(data.hourly.temperature_2m[hour], unit),
-        time: 0,
+        time: new Date(data.hourly.time[hour]).getTime(),
       };
     }
     for (let day = 0; day < 7; day += 1) {
@@ -111,7 +111,7 @@ module.exports = class OpenMeteo extends require('./Backend') {
         sunrise: new Date(data.daily.sunrise[day]).getTime(),
         sunset: new Date(data.daily.sunset[day]).getTime(),
         temp: Temperature.range(data.daily.temperature_2m_min[day], data.daily.temperature_2m_max[day], unit),
-        time: 0,
+        time: new Date(data.daily.time[day]).getTime(),
       };
     }
     return mapped;
