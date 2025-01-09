@@ -1,3 +1,10 @@
+## [1.0.1](https://github.com/LibreWeather/libre-weather-api/compare/v1.0.0...v1.0.1) (2025-01-09)
+
+
+### Bug Fixes
+
+* dates to be consistently milli epochs ([#16](https://github.com/LibreWeather/libre-weather-api/issues/16)) ([cead579](https://github.com/LibreWeather/libre-weather-api/commit/cead5791693b43c77051dec3dbd57c965605697a))
+
 # 1.0.0 (2025-01-08)
 
 

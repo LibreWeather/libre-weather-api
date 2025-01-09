@@ -1,6 +1,6 @@
 {
   "name": "libre-weather-api",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Open Weather APIs for the Open Sky",
   "main": "src/server.js",
   "scripts": {
