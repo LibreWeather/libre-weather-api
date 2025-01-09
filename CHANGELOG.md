@@ -1,3 +1,10 @@
+## [1.0.3](https://github.com/LibreWeather/libre-weather-api/compare/v1.0.2...v1.0.3) (2025-01-09)
+
+
+### Bug Fixes
+
+* run everything as UTC, add offset for hourlies ([27ef3f6](https://github.com/LibreWeather/libre-weather-api/commit/27ef3f64aba49bc5c88f4512f57fc45dc66c5e70))
+
 ## [1.0.2](https://github.com/LibreWeather/libre-weather-api/compare/v1.0.1...v1.0.2) (2025-01-09)
 
 
