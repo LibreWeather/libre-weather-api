@@ -32,13 +32,6 @@ jobs:
       - run: npm ci
       - run: npm run lint
 
-      - name: Build and push
-        uses: docker/build-push-action@v6
-        with:
-          context: .
-          platforms: linux/amd64,linux/arm64
-          push: false
-          tags: libreweather/libre-weather-api
       - name: Release
         uses: cycjimmy/semantic-release-action@v4
         env:
