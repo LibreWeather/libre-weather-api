@@ -1,0 +1,37 @@
+extends:
+  - airbnb-base
+  - 'plugin:prettier/recommended'
+parser: '@babel/eslint-parser'
+parserOptions:
+  sourceType: script
+  babelOptions:
+    plugins:
+      - '@babel/plugin-proposal-class-properties'
+      - '@babel/plugin-proposal-private-methods'
+rules:
+  valid-jsdoc:
+    - error
+    - requireReturn: false
+      requireReturnDescription: false
+      preferType:
+        String: string
+        Number: number
+        Boolean: boolean
+        Function: function
+        object: Object
+        date: Date
+        error: Error
+      prefer:
+        return: returns
+  no-underscore-dangle: 'off'
+  strict:
+    - error
+    - safe
+  linebreak-style: 'off'
+  no-restricted-syntax: 'off'
+  no-await-in-loop: 'off'
+  global-require: 'off'
+  no-fallthrough: 'off'
+  no-param-reassign: 'off'
+  no-case-declarations: 'off'
+  import/order: 'off'

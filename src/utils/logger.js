@@ -1,6 +1,6 @@
 'use strict';
 
-require('colors');
+const chalk = require('chalk');
 const { transports, createLogger, format } = require('winston');
 
 const { combine, label, printf, colorize } = format;
@@ -9,16 +9,16 @@ const color = (scope = 'PROC') => {
   let scoped;
   switch (scope.toUpperCase()) {
     case 'PROC':
-      scoped = 'PROC'.magenta;
+      scoped = chalk.magenta('PROC');
       break;
     case 'REST':
-      scoped = 'REST'.cyan;
+      scoped = chalk.cyan('REST');
       break;
     case 'SOCK':
-      scoped = 'SOCK'.yellow;
+      scoped = chalk.yellow('SOCK');
       break;
     default:
-      scoped = scope.toUpperCase().red;
+      scoped = chalk.red(scope.toUpperCase());
       break;
   }
   return scoped;
@@ -26,7 +26,7 @@ const color = (scope = 'PROC') => {
 
 /**
  * Create a colorized scope
- * @param  {string} scope [description]
+ * @param  {string} [scope=PROC] scope to use for colorizing
  * @returns {Object}       set up logger
  */
 const setup = (scope = 'PROC') => {

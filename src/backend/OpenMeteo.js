@@ -1,6 +1,9 @@
 'use strict';
 
 const fetch = require('node-fetch');
+const { findTimeZone, getUTCOffset } = require('timezone-support');
+
+const logger = require('../utils/logger')('METEO');
 const { volume: Volume, windspeed: WindSpeed, temp: Temperature } = require('../utils');
 
 module.exports = class OpenMeteo extends require('./Backend') {
@@ -76,6 +79,8 @@ module.exports = class OpenMeteo extends require('./Backend') {
   }
 
   serialize(data, unit) {
+    const tzOffset = data.utc_offset_seconds * 1000;
+
     const mapped = {
       current: {
         apparentTemp: new Temperature(data.hourly.apparent_temperature?.[0], unit),
@@ -85,7 +90,7 @@ module.exports = class OpenMeteo extends require('./Backend') {
         pressure: { value: data.hourly.pressure_msl?.[0], unit: 'MB' },
         sunrise: new Date(data.daily.sunrise[0]).getTime(),
         sunset: new Date(data.daily.sunset[0]).getTime(),
-        time: new Date(data.hourly[0]).getTime(),
+        time: new Date(data.hourly.time[0]).getTime() - tzOffset,
         temp: new Temperature(data.current_weather.temperature, unit),
         visibility: { unit: '%', value: data.hourly?.cloudcover?.[0] },
         windspeed: new WindSpeed(data.current_weather.windspeed, data.current_weather.winddirection, unit),
@@ -111,7 +116,7 @@ module.exports = class OpenMeteo extends require('./Backend') {
         sunrise: new Date(data.daily.sunrise[day]).getTime(),
         sunset: new Date(data.daily.sunset[day]).getTime(),
         temp: Temperature.range(data.daily.temperature_2m_min[day], data.daily.temperature_2m_max[day], unit),
-        time: new Date(data.daily.time[day]).getTime(),
+        time: new Date(data.daily.time[day]).getTime() - tzOffset,
       };
     }
     return mapped;
