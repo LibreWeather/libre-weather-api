@@ -1,3 +1,10 @@
+## [1.0.7](https://github.com/LibreWeather/libre-weather-api/compare/v1.0.6...v1.0.7) (2025-01-10)
+
+
+### Bug Fixes
+
+* **METEO:** sunrise/sunset offsets ([e6f4ffb](https://github.com/LibreWeather/libre-weather-api/commit/e6f4ffb3a64bb7cc443139d030506541849da34e))
+
 ## [1.0.6](https://github.com/LibreWeather/libre-weather-api/compare/v1.0.5...v1.0.6) (2025-01-10)
 
 
