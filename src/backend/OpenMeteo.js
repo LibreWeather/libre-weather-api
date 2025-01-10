@@ -98,10 +98,8 @@ module.exports = class OpenMeteo extends require('./Backend') {
     const now = new Date();
     for (let hour = 0; mapped.hourly.length < 168; hour += 1) {
       const hourDate = new Date(data.hourly.time[hour]);
-      if (hourDate.getTime() < now.getTime()) {
-        // eslint-disable-next-line no-continue
-        if (hourDate.getHours() !== now.getHours()) continue;
-      }
+      // eslint-disable-next-line no-continue
+      if (hourDate.getTime() < now.getTime()) continue;
       mapped.hourly[hour] = {
         condition: this.#WMO[data.hourly.weathercode[hour]],
         temp: new Temperature(data.hourly.temperature_2m[hour], unit),
