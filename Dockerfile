@@ -15,6 +15,5 @@ LABEL org.opencontainers.image.source=https://github.com/libreweather/libre-weat
 LABEL org.opencontainers.image.licenses=AGPL-3.0
 
 ENV NODE_ENV='production'
-ENV TZ='UTC'
 
 CMD ["node", "/frontend/src/server.js"]

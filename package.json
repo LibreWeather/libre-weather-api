@@ -22,11 +22,11 @@
   ],
   "main": "src/server.js",
   "scripts": {
-    "dev": "TZ=UTC nodemon --delay 5 --watch .env --watch src src/server.js",
+    "dev": "nodemon --delay 5 --watch .env --watch src src/server.js",
     "lint": "npx eslint src/.",
     "lint:fix": "npx eslint src/. --fix",
     "prepare": "husky || exit 0",
-    "start": "TZ=UTC node src/server.js",
+    "start": "node src/server.js",
     "test": "exit 0"
   },
   "dependencies": {

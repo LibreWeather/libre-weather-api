@@ -77,8 +77,6 @@ module.exports = class OpenMeteo extends require('./Backend') {
   }
 
   serialize(data, unit) {
-    const tzOffset = data.utc_offset_seconds * 1000;
-
     const mapped = {
       current: {
         apparentTemp: new Temperature(data.hourly.apparent_temperature?.[0], unit),
@@ -86,9 +84,9 @@ module.exports = class OpenMeteo extends require('./Backend') {
         dewPoint: new Temperature(data.hourly.dewpoint_2m?.[0], unit),
         humidity: Number.parseFloat(data.hourly.relativehumidity_2m?.[0], unit),
         pressure: { value: data.hourly.pressure_msl?.[0], unit: 'MB' },
-        sunrise: new Date(data.daily.sunrise[0]).getTime() - tzOffset,
-        sunset: new Date(data.daily.sunset[0]).getTime() - tzOffset,
-        time: new Date(data.hourly.time[0]).getTime() - tzOffset,
+        sunrise: new Date(data.daily.sunrise[0]).getTime(),
+        sunset: new Date(data.daily.sunset[0]).getTime(),
+        time: new Date(data.hourly.time[0]).getTime(),
         temp: new Temperature(data.current_weather.temperature, unit),
         visibility: { unit: '%', value: data.hourly?.cloudcover?.[0] },
         windspeed: new WindSpeed(data.current_weather.windspeed, data.current_weather.winddirection, unit),
@@ -97,11 +95,17 @@ module.exports = class OpenMeteo extends require('./Backend') {
       daily: [],
     };
 
-    for (let hour = 0; hour < 168; hour += 1) {
+    const now = new Date();
+    for (let hour = 0; mapped.hourly.length < 168; hour += 1) {
+      const hourDate = new Date(data.hourly.time[hour]);
+      if (hourDate.getTime() < now.getTime()) {
+        // eslint-disable-next-line no-continue
+        if (hourDate.getHours() !== now.getHours()) continue;
+      }
       mapped.hourly[hour] = {
         condition: this.#WMO[data.hourly.weathercode[hour]],
         temp: new Temperature(data.hourly.temperature_2m[hour], unit),
-        time: new Date(data.hourly.time[hour]).getTime() - tzOffset,
+        time: new Date(data.hourly.time[hour]).getTime(),
       };
     }
     for (let day = 0; day < 7; day += 1) {
@@ -111,10 +115,10 @@ module.exports = class OpenMeteo extends require('./Backend') {
         description: '',
         rainVolume: new Volume(condition === 'RAIN' ? data.daily.precipitation_sum[day] : null, unit),
         snowVolume: new Volume(condition === 'SNOW' ? data.daily.precipitation_sum[day] : null, unit),
-        sunrise: new Date(data.daily.sunrise[day]).getTime() - tzOffset,
-        sunset: new Date(data.daily.sunset[day]).getTime() - tzOffset,
+        sunrise: new Date(data.daily.sunrise[day]).getTime(),
+        sunset: new Date(data.daily.sunset[day]).getTime(),
         temp: Temperature.range(data.daily.temperature_2m_min[day], data.daily.temperature_2m_max[day], unit),
-        time: new Date(data.daily.time[day]).getTime() - tzOffset,
+        time: new Date(data.daily.time[day]).getTime(),
       };
     }
     return mapped;
