@@ -114,8 +114,8 @@ module.exports = class OpenMeteo extends require('./Backend') {
         description: '',
         rainVolume: new Volume(condition === 'RAIN' ? data.daily.precipitation_sum[day] : null, unit),
         snowVolume: new Volume(condition === 'SNOW' ? data.daily.precipitation_sum[day] : null, unit),
-        sunrise: new Date(data.daily.sunrise[day]).getTime(),
-        sunset: new Date(data.daily.sunset[day]).getTime(),
+        sunrise: new Date(data.daily.sunrise[day]).getTime() - tzOffset,
+        sunset: new Date(data.daily.sunset[day]).getTime() - tzOffset,
         temp: Temperature.range(data.daily.temperature_2m_min[day], data.daily.temperature_2m_max[day], unit),
         time: new Date(data.daily.time[day]).getTime() - tzOffset,
       };
