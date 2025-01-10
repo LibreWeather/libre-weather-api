@@ -1,3 +1,10 @@
+## [1.0.5](https://github.com/LibreWeather/libre-weather-api/compare/v1.0.4...v1.0.5) (2025-01-10)
+
+
+### Bug Fixes
+
+* just times after now ([d73c30e](https://github.com/LibreWeather/libre-weather-api/commit/d73c30e7ec9b72df3eee0bde60d7d4a46551ddcc))
+
 ## [1.0.4](https://github.com/LibreWeather/libre-weather-api/compare/v1.0.3...v1.0.4) (2025-01-10)
 
 
