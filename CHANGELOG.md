@@ -1,3 +1,10 @@
+## [1.0.6](https://github.com/LibreWeather/libre-weather-api/compare/v1.0.5...v1.0.6) (2025-01-10)
+
+
+### Bug Fixes
+
+* offset on some times ([06c8526](https://github.com/LibreWeather/libre-weather-api/commit/06c852682050574128f50d948616426e138b0adc))
+
 ## [1.0.5](https://github.com/LibreWeather/libre-weather-api/compare/v1.0.4...v1.0.5) (2025-01-10)
 
 
