@@ -1,3 +1,10 @@
+## [1.0.4](https://github.com/LibreWeather/libre-weather-api/compare/v1.0.3...v1.0.4) (2025-01-10)
+
+
+### Bug Fixes
+
+* drop offsets by filtering down to just times that are after the current time ([5e8a3da](https://github.com/LibreWeather/libre-weather-api/commit/5e8a3da36b052227a74151f0e742203f06ddca48))
+
 ## [1.0.3](https://github.com/LibreWeather/libre-weather-api/compare/v1.0.2...v1.0.3) (2025-01-09)
 
 
