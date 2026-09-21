@@ -26,6 +26,12 @@
  */
 
 /**
+ * @typedef {Object} TempRange
+ * @property {Temperature} min
+ * @property {Temperature} max
+ */
+
+/**
  * Current weather description
  * @typedef {Object} Current
  * @property {Temperature} apparentTemp
@@ -47,22 +53,49 @@
 /**
  * Daily weather representation
  * @typedef {Object} Daily
+ * @property {TempRange} [apparentTemp]
+ * @property {number} [cloudCover] cloud cover percent, 0-100
  * @property {Condition} condition
  * @property {string} description
+ * @property {number} [daylightDuration] daylight length in seconds
+ * @property {Temperature} [dewPoint]
+ * @property {number} [humidity]
+ * @property {number} [precipHours] hours with precipitation
+ * @property {number} [precipProbability] chance of precipitation, 0-100
+ * @property {Pressure} [pressure]
  * @property {Volume} rainVolume
  * @property {Volume} snowVolume
  * @property {Date} sunrise
+ * @property {number} [sunshineDuration] sunshine length in seconds
  * @property {Date} sunset
  * @property {TempRange} temp
  * @property {Date} time
+ * @property {number} [uvIndex]
+ * @property {WindSpeed} [windGust]
+ * @property {WindSpeed} [windspeed]
  */
 
 /**
- * Hourly Weather Representation
+ * Hourly weather representation
  * @typedef {Object} Hourly
+ * @property {Temperature} apparentTemp
+ * @property {number} cloudCover cloud cover percent, 0-100
  * @property {Condition} condition
+ * @property {string} description
+ * @property {Temperature} dewPoint
+ * @property {number} humidity
+ * @property {number} precipProbability chance of precipitation, 0-100
+ * @property {Volume} precipVolume total liquid-equivalent precipitation
+ * @property {Pressure} pressure
+ * @property {Volume} rainVolume
+ * @property {Volume} snowVolume
+ * @property {number} sunshineDuration sunshine in this hour, seconds (0-3600)
  * @property {Temperature} temp
  * @property {Date} time
+ * @property {number} uvIndex
+ * @property {Visibility} visibility
+ * @property {WindSpeed} [windGust]
+ * @property {WindSpeed} windspeed
  */
 
 /**
@@ -85,7 +118,6 @@ module.exports = class Backend {
    * @param {BackendOptions} options options object for requesting data
    * @returns {Promise<Object>}
    */
-
   async fetch(res, options) {
     const { lat, lon } = options;
 
@@ -104,6 +136,5 @@ module.exports = class Backend {
    * @param {Unit} unit serialization unit of measure
    * @returns {LibreWeatherData}
    */
-
-  serialize(data, unit) {}
+  serialize(_data, _unit) {}
 };
