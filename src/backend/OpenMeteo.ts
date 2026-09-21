@@ -1,6 +1,8 @@
-'use strict';
-
-const { volume: Volume, windspeed: WindSpeed, temp: Temperature, visibility: Visibility } = require('../utils');
+import { volume as Volume, windspeed as WindSpeed, temp as Temperature, visibility as Visibility } from '../utils';
+import { Condition, PressureUnit, UnitSystem, VisibilityUnit } from '../types';
+import Backend from './Backend';
+import type { BackendOptions } from './Backend';
+import type { Response } from 'express';
 
 const HOURLY_VARS = [
   'temperature_2m',
@@ -78,10 +80,10 @@ const at = (series, index) => series?.[index];
 
 const pressureOf = (value) => ({
   value: value == null ? null : Number.parseFloat(value),
-  unit: 'MB',
+  unit: PressureUnit.MB,
 });
 
-module.exports = class OpenMeteo extends require('./Backend') {
+export default class OpenMeteo extends Backend {
   #ROOT = 'https://api.open-meteo.com/v1';
 
   #PARAMS = ['current_weather=true', `hourly=${HOURLY_VARS}`, `daily=${DAILY_VARS}`];
@@ -103,35 +105,35 @@ module.exports = class OpenMeteo extends require('./Backend') {
    * 95         Thunderstorm: Slight or moderate
    * 96, 99     Thunderstorm with slight and heavy hail
    */
-  #WMO = {
-    0: 'CLEAR',
-    1: 'CLEAR',
-    2: 'PARTLY_CLOUDY',
-    3: 'CLOUDY',
-    45: 'FOG',
-    48: 'FOG',
-    51: 'RAIN',
-    53: 'RAIN',
-    55: 'RAIN',
-    56: 'SLEET',
-    57: 'SLEET',
-    61: 'RAIN',
-    63: 'RAIN',
-    65: 'RAIN',
-    66: 'SLEET',
-    67: 'SLEET',
-    71: 'SNOW',
-    73: 'SNOW',
-    75: 'SNOW',
-    77: 'SNOW',
-    80: 'RAIN',
-    81: 'RAIN',
-    82: 'RAIN',
-    85: 'SNOW',
-    86: 'SNOW',
-    95: 'RAIN',
-    96: 'RAIN',
-    99: 'RAIN',
+  #WMO: Record<number, Condition> = {
+    0: Condition.CLEAR,
+    1: Condition.CLEAR,
+    2: Condition.PARTLY_CLOUDY,
+    3: Condition.CLOUDY,
+    45: Condition.FOG,
+    48: Condition.FOG,
+    51: Condition.RAIN,
+    53: Condition.RAIN,
+    55: Condition.RAIN,
+    56: Condition.SLEET,
+    57: Condition.SLEET,
+    61: Condition.RAIN,
+    63: Condition.RAIN,
+    65: Condition.RAIN,
+    66: Condition.SLEET,
+    67: Condition.SLEET,
+    71: Condition.SNOW,
+    73: Condition.SNOW,
+    75: Condition.SNOW,
+    77: Condition.SNOW,
+    80: Condition.RAIN,
+    81: Condition.RAIN,
+    82: Condition.RAIN,
+    85: Condition.SNOW,
+    86: Condition.SNOW,
+    95: Condition.RAIN,
+    96: Condition.RAIN,
+    99: Condition.RAIN,
   };
 
   #condition(code) {
@@ -144,18 +146,18 @@ module.exports = class OpenMeteo extends require('./Backend') {
 
   #visibility(value, unit) {
     if (value == null || value === '') {
-      return { value: null, unit: unit === 'IMPERIAL' ? 'MI' : 'M' };
+      return { value: null, unit: unit === UnitSystem.IMPERIAL ? VisibilityUnit.MI : VisibilityUnit.M };
     }
     const n = Number.parseFloat(value);
-    if (unit === 'IMPERIAL') {
-      return { value: Number.parseFloat((n / 5280).toFixed(2)), unit: 'MI' };
+    if (unit === UnitSystem.IMPERIAL) {
+      return { value: Number.parseFloat((n / 5280).toFixed(2)), unit: VisibilityUnit.MI };
     }
     return new Visibility(n, unit);
   }
 
-  async fetch(res, options) {
+  async fetch(res: Response, options: BackendOptions) {
     super.fetch(res, options);
-    const { lat, lon, unit } = options;
+    const { lat, lon, unit = UnitSystem.METRIC } = options;
     const unitParams = [
       `temperature_unit=${Temperature.longUnit(unit)}`,
       `windspeed_unit=${WindSpeed.mapUnit(unit).toLowerCase()}`,
@@ -168,24 +170,24 @@ module.exports = class OpenMeteo extends require('./Backend') {
     return fetch(url).then((weather) => weather.json());
   }
 
-  serialize(data, unit) {
+  serialize(data: Record<string, any>, unit: string): any {
     const tzOffset = data.utc_offset_seconds * 1000;
     const hourlySrc = data.hourly || {};
     const dailySrc = data.daily || {};
-    const mapped = {
+    const mapped: any = {
       current: {
         apparentTemp: new Temperature(hourlySrc.apparent_temperature?.[0], unit),
         condition: this.#condition(data.current_weather.weathercode),
         description: this.#describe(data.current_weather.weathercode),
         dewPoint: new Temperature(hourlySrc.dewpoint_2m?.[0], unit),
-        humidity: Number.parseFloat(hourlySrc.relativehumidity_2m?.[0], unit),
+        humidity: Number.parseFloat(hourlySrc.relativehumidity_2m?.[0]),
         pressure: pressureOf(hourlySrc.pressure_msl?.[0]),
         sunrise: new Date(dailySrc.sunrise[0]).getTime(),
         sunset: new Date(dailySrc.sunset[0]).getTime(),
         time: new Date(hourlySrc.time[0]).getTime() - tzOffset,
         temp: new Temperature(data.current_weather.temperature, unit),
         uvIndex: Number.parseFloat(hourlySrc.uv_index?.[0]),
-        visibility: { unit: '%', value: hourlySrc.cloudcover?.[0] },
+        visibility: { unit: VisibilityUnit.Percent, value: hourlySrc.cloudcover?.[0] },
         windspeed: new WindSpeed(data.current_weather.windspeed, data.current_weather.winddirection, unit),
       },
       hourly: [],
