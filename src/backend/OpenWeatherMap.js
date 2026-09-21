@@ -1,7 +1,5 @@
 'use strict';
 
-const fetch = require('node-fetch');
-
 const {
   capitalize,
   volume: Volume,
@@ -74,7 +72,6 @@ module.exports = class OpenWeatherMap extends require('./Backend') {
     return data;
   }
 
-  // eslint-disable-next-line class-methods-use-this
   serialize(data, unit) {
     return {
       current: {

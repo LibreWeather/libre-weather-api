@@ -85,7 +85,7 @@ module.exports = class Backend {
    * @param {BackendOptions} options options object for requesting data
    * @returns {Promise<Object>}
    */
-  // eslint-disable-next-line class-methods-use-this
+
   async fetch(res, options) {
     const { lat, lon } = options;
 
@@ -104,6 +104,6 @@ module.exports = class Backend {
    * @param {Unit} unit serialization unit of measure
    * @returns {LibreWeatherData}
    */
-  // eslint-disable-next-line class-methods-use-this,no-unused-vars
+
   serialize(data, unit) {}
 };

@@ -1,6 +1,5 @@
 'use strict';
 
-// eslint-disable-next-line import/no-extraneous-dependencies
 if (process.env.NODE_ENV !== 'production') require('dotenv').config();
 
 const { logger } = require('./utils');

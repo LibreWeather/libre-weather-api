@@ -11,10 +11,10 @@ const cors = require('cors');
 // caching
 const cache = require('apicache').middleware;
 
-// yaml2json
-const y2j = require('yamljson');
+const fs = require('node:fs');
+const yaml = require('js-yaml');
 
-const spec = JSON.parse(y2j.convert('src/api-spec/openapi.yaml'));
+const spec = yaml.load(fs.readFileSync('src/api-spec/openapi.yaml', 'utf8'));
 
 // Some dependency/config stuff
 const adminCred = {
@@ -29,7 +29,6 @@ const initSecurity = (app) => {
 };
 
 const initSwagger = (app) => {
-  // eslint-disable-next-line max-len
   const swaggerAuth = (req, user, pass) => !isProd || (user === adminCred.user && pass === adminCred.pass);
   const swaggConfig = {
     swaggerSpec: spec,
