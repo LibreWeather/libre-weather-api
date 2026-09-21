@@ -49,3 +49,5 @@ nodemon.json
 .idea/
 .vscode/
 .eslintcache
+dist/
+*.tsbuildinfo

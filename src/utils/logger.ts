@@ -1,12 +1,10 @@
-'use strict';
-
-const chalk = require('chalk');
-const { transports, createLogger, format } = require('winston');
+import chalk from 'chalk';
+import { transports, createLogger, format } from 'winston';
 
 const { combine, label, printf, colorize } = format;
 
 const color = (scope = 'PROC') => {
-  let scoped;
+  let scoped: string;
   switch (scope.toUpperCase()) {
     case 'PROC':
       scoped = chalk.magenta('PROC');
@@ -24,15 +22,8 @@ const color = (scope = 'PROC') => {
   return scoped;
 };
 
-/**
- * Create a colorized scope
- * @param  {string} [scope=PROC] scope to use for colorizing
- * @returns {Object}       set up logger
- */
 const setup = (scope = 'PROC') => {
-  /* Logger setup */
-  const consoleTransport = new transports.Console({ colorize: true });
-
+  const consoleTransport = new transports.Console();
   const logFormat = printf((info) => `[${info.label}] ${info.level}: ${info.message}`);
   const logger = createLogger({
     level: process.env.LOG_LEVEL || 'error',
@@ -47,4 +38,4 @@ const setup = (scope = 'PROC') => {
   return logger;
 };
 
-module.exports = setup;
+export default setup;
