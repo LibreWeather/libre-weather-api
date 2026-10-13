@@ -119,104 +119,190 @@ paths:
 components:
   schemas:
     Weather:
+      type: object
       properties:
         source:
           type: string
           enum:
             - OWM (Open Weather Map)
+            - METEO (Open-Meteo)
+            - DEFAULT
         current:
-          type: object
-          properties:
-            apparentTemp:
-              description: The 'feels like' temperature
-              allOf:
-                - $ref: '#/components/schemas/Temperature'
-            condition:
-              $ref: '#/components/schemas/Condition'
-            description:
-              type: string
-              description: Description of the current weather
-            dewPoint:
-              description: The atmospheric temperature (varying according to pressure and humidity) below which water droplets begin to condense and dew can form
-              allOf:
-                - $ref: '#/components/schemas/Temperature'
-            humidity:
-              type: number
-              description: 'Numeric value of the humidity percent, to a hundredths precision'
-            pressure:
-              $ref: '#/components/schemas/Pressure'
-            summary:
-              type: string
-              description: Brief (1-2 word) summery of the current weather
-            sunrise:
-              type: number
-              description: 'The time of sunrise in seconds. Unix time, UTC.'
-            sunset:
-              type: number
-              description: 'The time of sunset in seconds. Unix time, UTC.'
-            temp:
-              description: The current temperature
-              allOf:
-                - $ref: '#/components/schemas/Temperature'
-            time:
-              type: number
-              description: 'The current time in seconds. Unix time, UTC.'
-            uvIndex:
-              type: number
-              description: 'Numeric value of the current UV index, to a hundredths precision'
-            visibility:
-              $ref: '#/components/schemas/Visibility'
-            windspeed:
-              $ref: '#/components/schemas/WindSpeed'
+          $ref: '#/components/schemas/Current'
         daily:
           type: array
-          description: 'Array of daily weather data, starting with today'
+          description: Array of daily weather data, starting with today
           items:
-            type: object
-            properties:
-              condition:
-                $ref: '#/components/schemas/Condition'
-              description:
-                type: string
-                description: Description of the weather for the day
-              rainVolume:
-                description: The total volume of rain for the day. The value be null if no rain is forecasted.
-                allOf:
-                  - $ref: '#/components/schemas/Volume'
-              snowVolume:
-                description: The total volume of snow for the day. The value be null if no snow is forecasted.
-                allOf:
-                  - $ref: '#/components/schemas/Volume'
-              sunrise:
-                type: number
-                description: 'The time of sunrise in seconds. Unix time, UTC.'
-              sunset:
-                type: number
-                description: 'The time of sunset in seconds. Unix time, UTC.'
-              temp:
-                type: object
-                description: The daily temperature data
-                properties:
-                  min:
-                    $ref: '#/components/schemas/Temperature'
-                  max:
-                    $ref: '#/components/schemas/Temperature'
-              time:
-                type: number
-                description: 'The time in seconds. Unix time, UTC.'
+            $ref: '#/components/schemas/Daily'
         hourly:
           type: array
-          description: 'Array of hourly weather data for the next 48 hours, starting with the current hour'
+          description: Array of upcoming hourly weather data, starting with the current hour
           items:
-            type: object
-            properties:
-              condition:
-                $ref: '#/components/schemas/Condition'
-              temp:
-                $ref: '#/components/schemas/Temperature'
-              time:
-                type: number
-                description: 'The time in seconds. Unix time, UTC.'
+            $ref: '#/components/schemas/Hourly'
+    Current:
+      type: object
+      properties:
+        apparentTemp:
+          description: The 'feels like' temperature
+          allOf:
+            - $ref: '#/components/schemas/Temperature'
+        condition:
+          $ref: '#/components/schemas/Condition'
+        description:
+          type: string
+          description: Description of the current weather
+        dewPoint:
+          description: Dew point temperature
+          allOf:
+            - $ref: '#/components/schemas/Temperature'
+        humidity:
+          type: number
+          description: Humidity percent
+        pressure:
+          $ref: '#/components/schemas/Pressure'
+        summary:
+          type: string
+          description: Brief (1-2 word) summary of the current weather
+        sunrise:
+          type: number
+          description: Sunrise time. Unix epoch milliseconds, UTC.
+        sunset:
+          type: number
+          description: Sunset time. Unix epoch milliseconds, UTC.
+        temp:
+          description: The current temperature
+          allOf:
+            - $ref: '#/components/schemas/Temperature'
+        time:
+          type: number
+          description: Observation time. Unix epoch milliseconds, UTC.
+        uvIndex:
+          type: number
+          description: Current UV index
+        visibility:
+          $ref: '#/components/schemas/Visibility'
+        windspeed:
+          $ref: '#/components/schemas/WindSpeed'
+    Daily:
+      type: object
+      properties:
+        apparentTemp:
+          $ref: '#/components/schemas/TempRange'
+        cloudCover:
+          type: number
+          description: Cloud cover percent, 0-100
+        condition:
+          $ref: '#/components/schemas/Condition'
+        daylightDuration:
+          type: number
+          description: Daylight length in seconds
+        description:
+          type: string
+          description: Description of the weather for the day
+        dewPoint:
+          $ref: '#/components/schemas/Temperature'
+        humidity:
+          type: number
+          description: Humidity percent
+        precipHours:
+          type: number
+          description: Hours with precipitation
+        precipProbability:
+          type: number
+          description: Chance of precipitation, 0-100
+        pressure:
+          $ref: '#/components/schemas/Pressure'
+        rainVolume:
+          description: Total rain for the day. Null if none forecast.
+          allOf:
+            - $ref: '#/components/schemas/Volume'
+        snowVolume:
+          description: Total snow for the day. Null if none forecast.
+          allOf:
+            - $ref: '#/components/schemas/Volume'
+        sunrise:
+          type: number
+          description: Sunrise time. Unix epoch milliseconds, UTC.
+        sunshineDuration:
+          type: number
+          description: Sunshine length in seconds
+        sunset:
+          type: number
+          description: Sunset time. Unix epoch milliseconds, UTC.
+        temp:
+          $ref: '#/components/schemas/TempRange'
+        time:
+          type: number
+          description: Local day start. Unix epoch milliseconds, UTC.
+        uvIndex:
+          type: number
+          description: Daily maximum UV index
+        windGust:
+          $ref: '#/components/schemas/WindSpeed'
+        windspeed:
+          $ref: '#/components/schemas/WindSpeed'
+    Hourly:
+      type: object
+      required:
+        - condition
+        - temp
+        - time
+      properties:
+        apparentTemp:
+          description: Feels-like temperature
+          allOf:
+            - $ref: '#/components/schemas/Temperature'
+        cloudCover:
+          type: number
+          description: Cloud cover percent, 0-100
+        condition:
+          $ref: '#/components/schemas/Condition'
+        description:
+          type: string
+          description: Text description of the hour's weather
+        dewPoint:
+          $ref: '#/components/schemas/Temperature'
+        humidity:
+          type: number
+          description: Humidity percent
+        precipProbability:
+          type: number
+          description: Chance of precipitation, 0-100
+        precipVolume:
+          description: Total liquid-equivalent precipitation for the hour
+          allOf:
+            - $ref: '#/components/schemas/Volume'
+        pressure:
+          $ref: '#/components/schemas/Pressure'
+        rainVolume:
+          $ref: '#/components/schemas/Volume'
+        snowVolume:
+          $ref: '#/components/schemas/Volume'
+        sunshineDuration:
+          type: number
+          description: Sunshine during this hour, in seconds (0-3600)
+        temp:
+          $ref: '#/components/schemas/Temperature'
+        time:
+          type: number
+          description: Hour start. Unix epoch milliseconds, UTC.
+        uvIndex:
+          type: number
+          description: UV index
+        visibility:
+          $ref: '#/components/schemas/Visibility'
+        windGust:
+          $ref: '#/components/schemas/WindSpeed'
+        windspeed:
+          $ref: '#/components/schemas/WindSpeed'
+    TempRange:
+      type: object
+      description: Daily temperature range
+      properties:
+        min:
+          $ref: '#/components/schemas/Temperature'
+        max:
+          $ref: '#/components/schemas/Temperature'
     Condition:
       type: string
       description: The weather condition value

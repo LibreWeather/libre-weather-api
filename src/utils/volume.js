@@ -26,12 +26,26 @@ module.exports = class Volume {
   }
 
   /**
+   * Wrap a value already in the target unit (no mm→in conversion).
+   * @param {string|number|null|undefined} value volume magnitude
+   * @param {string} system system of measure
+   * @returns {Volume}
+   */
+  static native(value, system) {
+    const volume = new Volume(null, system);
+    if (value != null && value !== '') {
+      volume.value = Number.parseFloat(value);
+    }
+    return volume;
+  }
+
+  /**
    * Create a volume object with value and unit system
    * @param {string} value volume magnitude
    * @param {string} system system of measure
    */
   constructor(value, system) {
-    if (value) {
+    if (value != null && value !== '') {
       switch (system) {
         case 'IMPERIAL':
           // Convert from millimeters to inches
