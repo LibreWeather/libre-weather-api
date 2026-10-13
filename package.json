@@ -31,9 +31,6 @@
     "test": "mocha --timeout 10000 --require ts-node/register 'test/**/*.test.ts'",
     "typecheck": "tsc --noEmit"
   },
-  "release": {
-    "extends": "./.config/release.config.mjs"
-  },
   "overrides": {
     "axios": "^1.12.2",
     "brace-expansion": "^1.1.12",
