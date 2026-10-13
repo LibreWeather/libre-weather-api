@@ -1,3 +1,10 @@
+## [1.2.2](https://github.com/LibreWeather/libre-weather-api/compare/v1.2.1...v1.2.2) (2026-10-13)
+
+
+### Bug Fixes
+
+* link NWS alerts to the human-readable forecast page ([d3ccf20](https://github.com/LibreWeather/libre-weather-api/commit/d3ccf20ae371f381c5cb91ab55095c16df274d29))
+
 ## [1.2.1](https://github.com/LibreWeather/libre-weather-api/compare/v1.2.0...v1.2.1) (2026-10-13)
 
 
