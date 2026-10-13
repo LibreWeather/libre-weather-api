@@ -1,3 +1,10 @@
+## [1.2.1](https://github.com/LibreWeather/libre-weather-api/compare/v1.2.0...v1.2.1) (2026-10-13)
+
+
+### Bug Fixes
+
+* support weather alerts ([160e0f1](https://github.com/LibreWeather/libre-weather-api/commit/160e0f1f306f99e8ae2c3060ce57f6c72b86978c))
+
 # [1.2.0](https://github.com/LibreWeather/libre-weather-api/compare/v1.1.1...v1.2.0) (2026-10-13)
 
 
