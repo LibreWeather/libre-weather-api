@@ -148,11 +148,20 @@ describe('OpenMeteo.serialize', () => {
     assert.ok(day.apparentTemp.max);
   });
 
-  it('skips hours that already ended', () => {
+  it('keeps hours that already ended so today can be charted from midnight', () => {
     const fixture = meteoFixture();
-    fixture.hourly.time[0] = hourIso(-3);
+    fixture.hourly.time = fixture.hourly.time.map((_, i) => hourIso(i - 3));
     const mapped = meteo.serialize(fixture, UnitSystem.METRIC);
-    assert.ok(mapped.hourly.every((hour) => hour.time + 60 * 60 * 1000 > Date.now() - 1000));
+    assert.equal(mapped.hourly.length, fixture.hourly.time.length);
+    assert.ok(mapped.hourly[0].time + 60 * 60 * 1000 <= Date.now());
+  });
+
+  it('reads current extras from the current hour, not the first hour', () => {
+    const fixture = meteoFixture();
+    fixture.hourly.time = fixture.hourly.time.map((_, i) => hourIso(i - 3));
+    fixture.hourly.apparent_temperature = fixture.hourly.time.map((_, i) => 60 + i);
+    const mapped = meteo.serialize(fixture, UnitSystem.METRIC);
+    assert.equal(Number(mapped.current.apparentTemp.value), 63);
   });
 });
 

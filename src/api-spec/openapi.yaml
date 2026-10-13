@@ -136,7 +136,7 @@ components:
             $ref: '#/components/schemas/Daily'
         hourly:
           type: array
-          description: Array of upcoming hourly weather data, starting with the current hour
+          description: Array of hourly weather data, starting at local midnight of the current day when the backend provides past hours (Open-Meteo), otherwise at the current hour
           items:
             $ref: '#/components/schemas/Hourly'
     Current:

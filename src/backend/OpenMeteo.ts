@@ -174,31 +174,32 @@ export default class OpenMeteo extends Backend {
     const tzOffset = data.utc_offset_seconds * 1000;
     const hourlySrc = data.hourly || {};
     const dailySrc = data.daily || {};
+    const times = hourlySrc.time || [];
+    const now = Date.now();
+    let cur = times.findLastIndex((t) => new Date(t).getTime() <= now);
+    if (cur < 0) cur = 0;
     const mapped: any = {
       current: {
-        apparentTemp: new Temperature(hourlySrc.apparent_temperature?.[0], unit),
+        apparentTemp: new Temperature(at(hourlySrc.apparent_temperature, cur), unit),
         condition: this.#condition(data.current_weather.weathercode),
         description: this.#describe(data.current_weather.weathercode),
-        dewPoint: new Temperature(hourlySrc.dewpoint_2m?.[0], unit),
-        humidity: Number.parseFloat(hourlySrc.relativehumidity_2m?.[0]),
-        pressure: pressureOf(hourlySrc.pressure_msl?.[0]),
+        dewPoint: new Temperature(at(hourlySrc.dewpoint_2m, cur), unit),
+        humidity: Number.parseFloat(at(hourlySrc.relativehumidity_2m, cur)),
+        pressure: pressureOf(at(hourlySrc.pressure_msl, cur)),
         sunrise: new Date(dailySrc.sunrise[0]).getTime(),
         sunset: new Date(dailySrc.sunset[0]).getTime(),
-        time: new Date(hourlySrc.time[0]).getTime() - tzOffset,
+        time: new Date(times[cur]).getTime() - tzOffset,
         temp: new Temperature(data.current_weather.temperature, unit),
-        uvIndex: Number.parseFloat(hourlySrc.uv_index?.[0]),
-        visibility: { unit: VisibilityUnit.Percent, value: hourlySrc.cloudcover?.[0] },
+        uvIndex: Number.parseFloat(at(hourlySrc.uv_index, cur)),
+        visibility: { unit: VisibilityUnit.Percent, value: at(hourlySrc.cloudcover, cur) },
         windspeed: new WindSpeed(data.current_weather.windspeed, data.current_weather.winddirection, unit),
       },
       hourly: [],
       daily: [],
     };
 
-    const now = Date.now();
-    const times = hourlySrc.time || [];
     for (let hour = 0; hour < times.length && mapped.hourly.length < 168; hour += 1) {
       const time = new Date(times[hour]).getTime();
-      if (time + 60 * 60 * 1000 <= now) continue;
       const code = at(hourlySrc.weathercode, hour);
       const windDir = at(hourlySrc.winddirection_10m, hour);
       const gust = at(hourlySrc.windgusts_10m, hour);
