@@ -27,7 +27,7 @@
     "lint:fix": "eslint . --config .config/eslint.config.mjs --fix",
     "prepare": "husky || exit 0",
     "start": "node src/server.js",
-    "test": "exit 0"
+    "test": "mocha --timeout 10000 'test/**/*.test.js'"
   },
   "release": {
     "extends": "./.config/.releaserc.yaml"
@@ -72,6 +72,7 @@
     "globals": "^16.4.0",
     "husky": "^9.1.7",
     "lint-staged": "^16.1.6",
+    "mocha": "^11.8.0",
     "nodemon": "^3.1.10"
   },
   "engines": {

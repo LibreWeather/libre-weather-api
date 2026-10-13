@@ -74,6 +74,12 @@ export default [
       sourceType: 'module',
     },
   },
+  {
+    files: ['test/**/*.{js,cjs}'],
+    languageOptions: {
+      globals: globals.mocha,
+    },
+  },
   ...jsonc.configs['flat/recommended-with-json'],
   ...yml.configs['flat/recommended'],
   {
