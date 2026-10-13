@@ -1,3 +1,10 @@
+## [1.1.1](https://github.com/LibreWeather/libre-weather-api/compare/v1.1.0...v1.1.1) (2026-10-13)
+
+
+### Bug Fixes
+
+* ship dotenv in prod deps and register nest routes before 404 ([2ca35ab](https://github.com/LibreWeather/libre-weather-api/commit/2ca35abd2a1bf57b2691655f4895a4d27d6509e8))
+
 # [1.1.0](https://github.com/LibreWeather/libre-weather-api/compare/v1.0.7...v1.1.0) (2026-10-13)
 
 
