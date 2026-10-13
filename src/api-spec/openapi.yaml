@@ -116,8 +116,102 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Weather'
+  /alerts/{lat},{lon}:
+    get:
+      summary: Active watches, warnings and advisories for a point, merged from every provider that covers it.
+      description: >-
+        Providers are chosen by location (NWS for the US and territories, MET Norway for Norway).
+        `coverage: false` means no configured provider covers the point, which is not the same as an all-clear.
+      parameters:
+        - in: path
+          name: lat
+          schema:
+            type: number
+          required: true
+        - in: path
+          name: lon
+          schema:
+            type: number
+          required: true
+      responses:
+        '200':
+          description: Active alerts, most severe first
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Alerts'
+        '400':
+          description: Coordinates are missing or out of range
+        '502':
+          description: Every provider covering the point failed
 components:
   schemas:
+    Alerts:
+      type: object
+      required: [coverage, sources, alerts]
+      properties:
+        coverage:
+          type: boolean
+          description: Whether any configured provider covers the point
+        sources:
+          type: array
+          items:
+            $ref: '#/components/schemas/AlertSource'
+        alerts:
+          type: array
+          items:
+            $ref: '#/components/schemas/Alert'
+    AlertSource:
+      type: string
+      enum: [NWS, METNO]
+    Alert:
+      type: object
+      required: [id, source, event, headline, description, severity, sender, areas]
+      properties:
+        id:
+          type: string
+        source:
+          $ref: '#/components/schemas/AlertSource'
+        event:
+          type: string
+          example: Tornado Warning
+        headline:
+          type: string
+        description:
+          type: string
+        instruction:
+          type: string
+          nullable: true
+        severity:
+          type: string
+          enum: [EXTREME, SEVERE, MODERATE, MINOR, UNKNOWN]
+        urgency:
+          type: string
+          nullable: true
+          description: CAP urgency, e.g. Immediate, Expected, Future
+        certainty:
+          type: string
+          nullable: true
+          description: CAP certainty, e.g. Observed, Likely, Possible
+        onset:
+          type: number
+          nullable: true
+          description: Epoch milliseconds
+        expires:
+          type: number
+          nullable: true
+          description: Epoch milliseconds; when this message stops being current
+        ends:
+          type: number
+          nullable: true
+          description: Epoch milliseconds; when the hazard is expected to end
+        sender:
+          type: string
+        areas:
+          type: string
+        url:
+          type: string
+          nullable: true
     Weather:
       type: object
       properties:
