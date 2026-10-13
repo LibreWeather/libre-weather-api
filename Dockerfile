@@ -1,10 +1,9 @@
-FROM docker.io/node:20-alpine
+FROM docker.io/node:24-alpine
 
 WORKDIR /frontend
 
 COPY package.json .
 COPY package-lock.json .
-COPY .babelrc.json .
 
 RUN npm ci --omit dev
 

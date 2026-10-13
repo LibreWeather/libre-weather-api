@@ -47,3 +47,5 @@ tmp/
 nodemon.json
 .env*
 .idea/
+.vscode/
+.eslintcache
