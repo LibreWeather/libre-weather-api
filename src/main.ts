@@ -22,6 +22,7 @@ async function bootstrap() {
   applyExpressAddons(http);
 
   const app = await NestFactory.create<NestExpressApplication>(AppModule, new ExpressAdapter(http), { logger: false });
+  await app.init();
 
   http.use((_req, res) => {
     res.status(404).json({ error: 'No such route.', code: 404 }).end();
