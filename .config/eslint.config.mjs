@@ -1,3 +1,4 @@
+import tseslint from 'typescript-eslint';
 import js from '@eslint/js';
 import stylistic from '@stylistic/eslint-plugin';
 import { importX } from 'eslint-plugin-import-x';
@@ -23,15 +24,17 @@ export default [
     ignores: ['node_modules/**', 'coverage/**', 'dist/**', 'tmp/**', 'package-lock.json', 'CHANGELOG.md'],
   },
   {
-    files: ['**/*.{js,mjs,cjs}'],
+    files: ['**/*.{js,mjs,cjs,ts}'],
     ...js.configs.recommended,
     languageOptions: {
       ecmaVersion: 'latest',
-      sourceType: 'commonjs',
+      sourceType: 'module',
+      parser: tseslint.parser,
       globals: globals.node,
     },
     plugins: {
       '@stylistic': stylistic,
+      '@typescript-eslint': tseslint.plugin,
       'import-x': importX,
     },
     rules: {
@@ -50,8 +53,9 @@ export default [
           functions: 'never',
         },
       ],
+      'no-undef': 'off',
       'no-underscore-dangle': 'off',
-      strict: ['error', 'safe'],
+      strict: 'off',
       'no-restricted-syntax': 'off',
       'no-await-in-loop': 'off',
       'no-fallthrough': 'off',
@@ -75,7 +79,7 @@ export default [
     },
   },
   {
-    files: ['test/**/*.{js,cjs}'],
+    files: ['test/**/*.{js,cjs,ts}'],
     languageOptions: {
       globals: globals.mocha,
     },

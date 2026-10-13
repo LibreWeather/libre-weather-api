@@ -1,13 +1,12 @@
-'use strict';
+import { strict as assert } from 'node:assert';
+import fs from 'node:fs';
+import path from 'node:path';
+import yaml from 'js-yaml';
 
-const { strict: assert } = require('node:assert');
-const fs = require('node:fs');
-const path = require('node:path');
-const yaml = require('js-yaml');
-
-const Volume = require('../src/utils/volume');
-const OpenMeteo = require('../src/backend/OpenMeteo');
-const OpenWeatherMap = require('../src/backend/OpenWeatherMap');
+import Volume from '../src/utils/volume';
+import OpenMeteo from '../src/backend/OpenMeteo';
+import OpenWeatherMap from '../src/backend/OpenWeatherMap';
+import { Condition, UnitSystem, VolumeUnit } from '../src/types';
 
 const hourIso = (offsetHours) => {
   const date = new Date(Date.now() + offsetHours * 60 * 60 * 1000);
@@ -75,26 +74,26 @@ const meteoFixture = () => {
 
 describe('Volume', () => {
   it('keeps a native imperial inch value without converting mm→in again', () => {
-    const volume = Volume.native(0.25, 'IMPERIAL');
-    assert.equal(volume.unit, 'IN');
+    const volume = Volume.native(0.25, UnitSystem.IMPERIAL);
+    assert.equal(volume.unit, VolumeUnit.IN);
     assert.equal(volume.value, 0.25);
   });
 
   it('treats 0 as a real measurement instead of null', () => {
-    const volume = new Volume(0, 'METRIC');
+    const volume = new Volume(0, UnitSystem.METRIC);
     assert.equal(volume.value, 0);
-    assert.equal(volume.unit, 'MM');
+    assert.equal(volume.unit, VolumeUnit.MM);
   });
 
   it('converts millimetres to inches for IMPERIAL', () => {
-    const volume = new Volume(25.4, 'IMPERIAL');
-    assert.equal(volume.unit, 'IN');
-    assert.equal(Number.parseFloat(volume.value).toFixed(2), '1.00');
+    const volume = new Volume(25.4, UnitSystem.IMPERIAL);
+    assert.equal(volume.unit, VolumeUnit.IN);
+    assert.equal(Number.parseFloat(String(volume.value)).toFixed(2), '1.00');
   });
 
   it('maps null input to a null magnitude', () => {
-    assert.equal(Volume.native(null, 'METRIC').value, null);
-    assert.equal(new Volume(null, 'METRIC').value, null);
+    assert.equal(Volume.native(null, UnitSystem.METRIC).value, null);
+    assert.equal(new Volume(null, UnitSystem.METRIC).value, null);
   });
 });
 
@@ -102,7 +101,7 @@ describe('OpenMeteo.serialize', () => {
   const meteo = new OpenMeteo();
 
   it('exposes Hourly fields used by the graph (precip, wind, UV, sun, humidity)', () => {
-    const mapped = meteo.serialize(meteoFixture(), 'IMPERIAL');
+    const mapped = meteo.serialize(meteoFixture(), UnitSystem.IMPERIAL);
     assert.ok(mapped.hourly.length >= 2, 'future hours should survive the now-filter');
     const hour = mapped.hourly[0];
     assert.equal(typeof hour.condition, 'string');
@@ -121,25 +120,25 @@ describe('OpenMeteo.serialize', () => {
   });
 
   it('maps WMO rain codes to RAIN and a human description', () => {
-    const mapped = meteo.serialize(meteoFixture(), 'IMPERIAL');
-    const rain = mapped.hourly.find((hour) => hour.condition === 'RAIN');
+    const mapped = meteo.serialize(meteoFixture(), UnitSystem.IMPERIAL);
+    const rain = mapped.hourly.find((hour) => hour.condition === Condition.RAIN);
     assert.ok(rain, 'fixture includes rain hours');
     assert.match(rain.description, /rain|drizzle|shower|thunderstorm/i);
   });
 
   it('keeps rain and snow volumes in the requested unit (no double convert)', () => {
-    const mapped = meteo.serialize(meteoFixture(), 'IMPERIAL');
+    const mapped = meteo.serialize(meteoFixture(), UnitSystem.IMPERIAL);
     const wet = mapped.hourly.find((hour) => hour.precipVolume.value > 0);
     assert.ok(wet);
-    assert.equal(wet.precipVolume.unit, 'IN');
+    assert.equal(wet.precipVolume.unit, VolumeUnit.IN);
     assert.ok(wet.precipVolume.value >= 0.05);
   });
 
   it('fills Daily extras: precip chance, wind, UV, sunshine, feels-like range', () => {
-    const mapped = meteo.serialize(meteoFixture(), 'IMPERIAL');
+    const mapped = meteo.serialize(meteoFixture(), UnitSystem.IMPERIAL);
     assert.ok(mapped.daily.length >= 1);
     const day = mapped.daily[0];
-    assert.equal(day.condition, 'RAIN');
+    assert.equal(day.condition, Condition.RAIN);
     assert.equal(typeof day.precipProbability, 'number');
     assert.equal(typeof day.precipHours, 'number');
     assert.ok(day.windspeed);
@@ -152,7 +151,7 @@ describe('OpenMeteo.serialize', () => {
   it('skips hours that already ended', () => {
     const fixture = meteoFixture();
     fixture.hourly.time[0] = hourIso(-3);
-    const mapped = meteo.serialize(fixture, 'METRIC');
+    const mapped = meteo.serialize(fixture, UnitSystem.METRIC);
     assert.ok(mapped.hourly.every((hour) => hour.time + 60 * 60 * 1000 > Date.now() - 1000));
   });
 });
@@ -234,16 +233,16 @@ describe('OpenWeatherMap.serialize', () => {
   };
 
   it('reads rain.1h objects and pop as a percent', () => {
-    const mapped = owm.serialize(payload, 'IMPERIAL');
-    assert.equal(mapped.hourly[0].condition, 'RAIN');
+    const mapped = owm.serialize(payload, UnitSystem.IMPERIAL);
+    assert.equal(mapped.hourly[0].condition, Condition.RAIN);
     assert.equal(mapped.hourly[0].precipProbability, 15);
     assert.ok(mapped.hourly[0].precipVolume.value > 0);
-    assert.equal(mapped.hourly[1].condition, 'CLOUDY');
+    assert.equal(mapped.hourly[1].condition, Condition.CLOUDY);
     assert.equal(mapped.hourly[1].precipProbability, 0);
   });
 
   it('capitalizes descriptions and maps daily pop to percent', () => {
-    const mapped = owm.serialize(payload, 'METRIC');
+    const mapped = owm.serialize(payload, UnitSystem.METRIC);
     assert.equal(mapped.hourly[0].description, 'Light rain');
     assert.equal(mapped.daily[0].precipProbability, 40);
     assert.equal(mapped.daily[0].description, 'Light rain');
@@ -251,7 +250,7 @@ describe('OpenWeatherMap.serialize', () => {
 });
 
 describe('OpenAPI Hourly/Daily types', () => {
-  const spec = yaml.load(fs.readFileSync(path.join(__dirname, '../src/api-spec/openapi.yaml'), 'utf8'));
+  const spec: any = yaml.load(fs.readFileSync(path.join(__dirname, '../src/api-spec/openapi.yaml'), 'utf8'));
 
   it('exposes named Hourly, Daily, Current, and TempRange schemas', () => {
     const { schemas } = spec.components;

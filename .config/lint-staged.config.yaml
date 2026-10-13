@@ -1,4 +1,4 @@
-'*.{js,mjs,cjs}':
+'*.{js,mjs,cjs,ts}':
   - eslint --config .config/eslint.config.mjs --cache --fix
 '*.{json,yml,yaml}':
   - eslint --config .config/eslint.config.mjs --cache --fix
