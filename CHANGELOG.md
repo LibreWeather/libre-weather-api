@@ -1,3 +1,10 @@
+# [1.2.0](https://github.com/LibreWeather/libre-weather-api/compare/v1.1.1...v1.2.0) (2026-10-13)
+
+
+### Features
+
+* return today's hourly data from midnight and fix current-hour extras ([9dc8a79](https://github.com/LibreWeather/libre-weather-api/commit/9dc8a79ab31fbbded9368461572a8355aa26aeca))
+
 ## [1.1.1](https://github.com/LibreWeather/libre-weather-api/compare/v1.1.0...v1.1.1) (2026-10-13)
 
 
