@@ -32,7 +32,7 @@
     "typecheck": "tsc --noEmit"
   },
   "release": {
-    "extends": "./.config/.releaserc.yaml"
+    "extends": "./.config/release.config.mjs"
   },
   "overrides": {
     "axios": "^1.12.2",
