@@ -64,7 +64,7 @@ describe('NWS alerts', () => {
           },
         },
       ],
-    });
+    }, { lat: 39.1, lon: -94.58 });
     assert.equal(out.source, AlertSource.NWS);
     assert.equal(out.severity, AlertSeverity.EXTREME);
     assert.equal(out.description, 'At 4:05 PM a tornado was observed.');
@@ -72,7 +72,7 @@ describe('NWS alerts', () => {
     assert.equal(out.onset, Date.parse('2026-10-13T21:05:00Z'));
     assert.equal(out.expires, Date.parse('2026-10-13T21:45:00Z'));
     assert.equal(out.ends, null);
-    assert.equal(out.url, 'https://api.weather.gov/alerts/urn:oid:1');
+    assert.equal(out.url, 'https://forecast.weather.gov/MapClick.php?lat=39.1000&lon=-94.5800');
   });
 
   it('drops test and exercise messages', () => {

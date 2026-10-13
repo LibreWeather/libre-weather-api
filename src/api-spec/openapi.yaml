@@ -212,6 +212,7 @@ components:
         url:
           type: string
           nullable: true
+          description: Human-readable page at the issuing service.
     Weather:
       type: object
       properties:

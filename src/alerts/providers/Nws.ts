@@ -57,10 +57,19 @@ export default class Nws implements AlertProvider {
     });
     if (res.status === 400 || res.status === 404) return null;
     if (!res.ok) throw new Error(`NWS alerts failed: ${res.status}`);
-    return Nws.serialize((await res.json()) as NwsResponse);
+    return Nws.serialize((await res.json()) as NwsResponse, { lat, lon });
   }
 
-  static serialize(data: NwsResponse): Alert[] {
+  /**
+   * NWS has no human-readable page per alert (`@id` is JSON), so link the point forecast,
+   * which lists active hazards for the location with their full text.
+   */
+  static pageFor({ lat, lon }: { lat: number; lon: number }) {
+    return `https://forecast.weather.gov/MapClick.php?lat=${lat.toFixed(4)}&lon=${lon.toFixed(4)}`;
+  }
+
+  static serialize(data: NwsResponse, point?: { lat: number; lon: number }): Alert[] {
+    const url = point ? Nws.pageFor(point) : null;
     return (data.features ?? [])
       .map(({ properties: p }) => p)
       .filter((p) => !p.status || p.status === 'Actual')
@@ -79,7 +88,7 @@ export default class Nws implements AlertProvider {
         ends: toEpoch(p.ends),
         sender: p.senderName || 'National Weather Service',
         areas: p.areaDesc ?? '',
-        url: p['@id'] ?? null,
+        url,
       }));
   }
 }
