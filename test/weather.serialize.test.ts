@@ -163,6 +163,66 @@ describe('OpenMeteo.serialize', () => {
     const mapped = meteo.serialize(fixture, UnitSystem.METRIC);
     assert.equal(Number(mapped.current.apparentTemp.value), 63);
   });
+
+  it('returns only the requested slice', () => {
+    const fixture = meteoFixture();
+    const current = meteo.serialize(fixture, UnitSystem.METRIC, 'current');
+    assert.ok(current.current);
+    assert.equal(current.hourly, undefined);
+    assert.equal(current.daily, undefined);
+    const hourly = meteo.serialize(fixture, UnitSystem.METRIC, 'hourly');
+    assert.ok(hourly.hourly.length);
+    assert.equal(hourly.current, undefined);
+    const daily = meteo.serialize(fixture, UnitSystem.METRIC, 'daily');
+    assert.ok(daily.daily.length);
+    assert.equal(daily.hourly, undefined);
+  });
+
+  it('maps a current-only upstream payload', () => {
+    const mapped = meteo.serialize(
+      {
+        utc_offset_seconds: 0,
+        current: {
+          time: hourIso(0),
+          temperature_2m: 70,
+          relative_humidity_2m: 55,
+          apparent_temperature: 68,
+          dew_point_2m: 50,
+          weather_code: 1,
+          pressure_msl: 1012,
+          cloud_cover: 20,
+          wind_speed_10m: 5,
+          wind_direction_10m: 90,
+          uv_index: 3,
+        },
+        daily: { sunrise: [`${hourIso(0).slice(0, 10)}T06:00`], sunset: [`${hourIso(0).slice(0, 10)}T18:00`] },
+      },
+      UnitSystem.METRIC,
+      'current'
+    );
+    assert.equal(mapped.current.condition, Condition.CLEAR);
+    assert.equal(Number(mapped.current.temp.value), 70);
+    assert.equal(mapped.current.visibility.value, 20);
+    assert.equal(mapped.hourly, undefined);
+  });
+
+  it('asks Open-Meteo only for the slice it is serving', () => {
+    const current = meteo.forecastUrl({ lat: '1', lon: '2', unit: UnitSystem.METRIC, tz: 'UTC', part: 'current' });
+    assert.match(current, /[?&]current=/);
+    assert.match(current, /forecast_days=1/);
+    assert.doesNotMatch(current, /[?&]hourly=/);
+    const hourly = meteo.forecastUrl({ lat: '1', lon: '2', unit: UnitSystem.METRIC, tz: 'UTC', part: 'hourly' });
+    assert.match(hourly, /[?&]hourly=/);
+    assert.doesNotMatch(hourly, /[?&]daily=/);
+    assert.doesNotMatch(hourly, /current_weather/);
+    const daily = meteo.forecastUrl({ lat: '1', lon: '2', unit: UnitSystem.METRIC, tz: 'UTC', part: 'daily' });
+    assert.match(daily, /[?&]daily=/);
+    assert.doesNotMatch(daily, /[?&]hourly=/);
+    const all = meteo.forecastUrl({ lat: '1', lon: '2', unit: UnitSystem.METRIC, tz: 'UTC' });
+    assert.match(all, /current_weather=true/);
+    assert.match(all, /[?&]hourly=/);
+    assert.match(all, /[?&]daily=/);
+  });
 });
 
 describe('OpenWeatherMap.serialize', () => {
@@ -256,6 +316,15 @@ describe('OpenWeatherMap.serialize', () => {
     assert.equal(mapped.daily[0].precipProbability, 40);
     assert.equal(mapped.daily[0].description, 'Light rain');
   });
+
+  it('drops sections excluded from a slice', () => {
+    const current = owm.serialize(payload, UnitSystem.METRIC, 'current');
+    assert.ok(current.current);
+    assert.equal(current.hourly, undefined);
+    assert.equal(current.daily, undefined);
+    const url = owm.forecastUrl({ lat: '1', lon: '2', unit: 'metric', part: 'hourly' });
+    assert.match(url, /exclude=current,minutely,daily,alerts/);
+  });
 });
 
 describe('OpenAPI Hourly/Daily types', () => {
@@ -269,6 +338,12 @@ describe('OpenAPI Hourly/Daily types', () => {
     assert.ok(schemas.TempRange);
     assert.deepEqual(schemas.Weather.properties.hourly.items.$ref, '#/components/schemas/Hourly');
     assert.deepEqual(schemas.Weather.properties.daily.items.$ref, '#/components/schemas/Daily');
+  });
+
+  it('documents separate current, hourly, and daily routes', () => {
+    assert.ok(spec.paths['/weather/{lat},{lon}/unit/{unit}/current']);
+    assert.ok(spec.paths['/weather/{lat},{lon}/unit/{unit}/hourly']);
+    assert.ok(spec.paths['/weather/{lat},{lon}/unit/{unit}/daily']);
   });
 
   it('documents graph fields on Hourly', () => {

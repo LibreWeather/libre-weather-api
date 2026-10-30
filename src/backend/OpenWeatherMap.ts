@@ -5,7 +5,7 @@ import WindSpeed from '../utils/windspeed';
 import Temperature from '../utils/temp';
 import { Condition, PressureUnit } from '../types';
 import Backend from './Backend';
-import type { BackendOptions } from './Backend';
+import type { BackendOptions, WeatherPart } from './Backend';
 import type { Response } from 'express';
 
 export default class OpenWeatherMap extends Backend {
@@ -70,26 +70,38 @@ export default class OpenWeatherMap extends Backend {
   }
 
   /**
-   * Fetch data from Open Weather Maps
-   * @param {Express.Response} res response
-   * @param {BackendOptions} options weather map options
+   * One Call URL for one slice. `exclude` drops the sections this slice does not need.
+   * @param {BackendOptions} options
+   * @returns {string}
    */
+  forecastUrl(options: BackendOptions) {
+    const { lat, lon, unit, part = 'all' } = options;
+    const exclude: Partial<Record<WeatherPart, string>> = {
+      current: 'minutely,hourly,daily,alerts',
+      hourly: 'current,minutely,daily,alerts',
+      daily: 'current,minutely,hourly,alerts',
+    };
+    const dropped = exclude[part];
+    const url = `${this.#OPEN_WEATHER_ROOT}?lat=${lat}&lon=${lon}&appid=${this.#APP_ID}&units=${unit}`;
+    return dropped ? `${url}&exclude=${dropped}` : url;
+  }
+
   async fetch(res: Response, options: BackendOptions) {
     super.fetch(res, options);
-    const { lat, lon, unit } = options;
+    const { lat, lon } = options;
 
     let data;
     if (lat && lon) {
-      const url = `${this.#OPEN_WEATHER_ROOT}?lat=${lat}&lon=${lon}&appid=${this.#APP_ID}&units=${unit}`;
-      data = await fetch(url).then((weather) => weather.json());
+      data = await fetch(this.forecastUrl(options)).then((weather) => weather.json());
     }
 
     return data;
   }
 
-  serialize(data: Record<string, any>, unit: string): any {
-    return {
-      current: {
+  serialize(data: Record<string, any>, unit: string, part: WeatherPart = 'all'): any {
+    const mapped: Record<string, unknown> = {};
+    if (part === 'all' || part === 'current') {
+      mapped.current = {
         apparentTemp: new Temperature(data.current.feels_like, unit),
         condition: OpenWeatherMap.#conditionCode(data.current.weather[0].id),
         description: capitalize(data.current.weather[0].description),
@@ -107,8 +119,10 @@ export default class OpenWeatherMap extends Backend {
         uvIndex: Number.parseFloat(data.current.uvi),
         visibility: new Visibility(data.current.visibility, unit),
         windspeed: new WindSpeed(data.current.wind_speed, data.current.wind_deg, unit),
-      },
-      daily: data.daily.map((day: Record<string, any>) => {
+      };
+    }
+    if (part === 'all' || part === 'daily') {
+      mapped.daily = data.daily.map((day: Record<string, any>) => {
         const {
           clouds,
           dew_point: dewPoint,
@@ -156,8 +170,10 @@ export default class OpenWeatherMap extends Backend {
           windspeed: new WindSpeed(windSpeed, windDeg, unit),
           cloudCover: clouds == null ? null : Number.parseFloat(clouds),
         };
-      }),
-      hourly: data.hourly.map((hour: Record<string, any>) => {
+      });
+    }
+    if (part === 'all' || part === 'hourly') {
+      mapped.hourly = data.hourly.map((hour: Record<string, any>) => {
         const rainMm = OpenWeatherMap.#volumeMm(hour.rain);
         const snowMm = OpenWeatherMap.#volumeMm(hour.snow);
         const precipMm = rainMm == null && snowMm == null ? 0 : (rainMm || 0) + (snowMm || 0);
@@ -181,7 +197,8 @@ export default class OpenWeatherMap extends Backend {
           windGust: hour.wind_gust == null ? null : new WindSpeed(hour.wind_gust, hour.wind_deg, unit),
           windspeed: new WindSpeed(hour.wind_speed, hour.wind_deg, unit),
         };
-      }),
-    };
+      });
+    }
+    return mapped;
   }
 }

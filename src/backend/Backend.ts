@@ -1,10 +1,17 @@
 import type { Response } from 'express';
 
+/** `all` is the legacy combined payload. The others are fetched and cached on their own. */
+export type WeatherPart = 'all' | 'current' | 'hourly' | 'daily';
+
+export const isWeatherSlice = (part: string): part is Exclude<WeatherPart, 'all'> =>
+  part === 'current' || part === 'hourly' || part === 'daily';
+
 export type BackendOptions = {
   lat?: string;
   lon?: string;
   unit?: string;
   tz?: string;
+  part?: WeatherPart;
 };
 
 export default class Backend {
@@ -20,7 +27,7 @@ export default class Backend {
     return null;
   }
 
-  serialize(_data: unknown, _unit: string): any {
+  serialize(_data: unknown, _unit: string, _part?: WeatherPart): any {
     return undefined;
   }
 }

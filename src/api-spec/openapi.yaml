@@ -116,6 +116,90 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Weather'
+  /weather/{lat},{lon}/unit/{unit}/current:
+    get:
+      summary: Current conditions for a point.
+      description: Small payload. Cached for 15 minutes; clients should poll every 15–30 minutes.
+      parameters:
+        - in: path
+          name: lat
+          schema:
+            type: number
+          required: true
+        - in: path
+          name: lon
+          schema:
+            type: number
+          required: true
+        - in: path
+          name: unit
+          required: true
+          schema:
+            type: string
+            enum: [DEFAULT, METRIC, IMPERIAL]
+      responses:
+        '200':
+          description: Current conditions, including today's sunrise and sunset
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CurrentReport'
+  /weather/{lat},{lon}/unit/{unit}/hourly:
+    get:
+      summary: Hourly forecast, the large dataset.
+      description: Cached for 45 minutes; clients should poll about once an hour.
+      parameters:
+        - in: path
+          name: lat
+          schema:
+            type: number
+          required: true
+        - in: path
+          name: lon
+          schema:
+            type: number
+          required: true
+        - in: path
+          name: unit
+          required: true
+          schema:
+            type: string
+            enum: [DEFAULT, METRIC, IMPERIAL]
+      responses:
+        '200':
+          description: Hourly forecast from local midnight, up to 168 hours
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HourlyReport'
+  /weather/{lat},{lon}/unit/{unit}/daily:
+    get:
+      summary: Daily forecast.
+      description: Cached for 6 hours; clients should poll about every 12 hours.
+      parameters:
+        - in: path
+          name: lat
+          schema:
+            type: number
+          required: true
+        - in: path
+          name: lon
+          schema:
+            type: number
+          required: true
+        - in: path
+          name: unit
+          required: true
+          schema:
+            type: string
+            enum: [DEFAULT, METRIC, IMPERIAL]
+      responses:
+        '200':
+          description: Daily forecast starting with today
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DailyReport'
   /alerts/{lat},{lon}:
     get:
       summary: Active watches, warnings and advisories for a point, merged from every provider that covers it.
@@ -234,6 +318,28 @@ components:
           description: Array of hourly weather data, starting at local midnight of the current day when the backend provides past hours (Open-Meteo), otherwise at the current hour
           items:
             $ref: '#/components/schemas/Hourly'
+    CurrentReport:
+      type: object
+      required: [current]
+      properties:
+        current:
+          $ref: '#/components/schemas/Current'
+    HourlyReport:
+      type: object
+      required: [hourly]
+      properties:
+        hourly:
+          type: array
+          items:
+            $ref: '#/components/schemas/Hourly'
+    DailyReport:
+      type: object
+      required: [daily]
+      properties:
+        daily:
+          type: array
+          items:
+            $ref: '#/components/schemas/Daily'
     Current:
       type: object
       properties:

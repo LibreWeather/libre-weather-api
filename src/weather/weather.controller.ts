@@ -1,5 +1,6 @@
 import { Controller, Get, Headers, Param, Res } from '@nestjs/common';
 import type { Response } from 'express';
+import { isWeatherSlice } from '../backend/Backend';
 import { units } from '../utils';
 import { WeatherService } from './weather.service';
 
@@ -33,6 +34,24 @@ export class WeatherController {
     }
     const [lat, lon] = coords.split(',');
     return this.weather.getByLatLon(res, { lat, lon, unit, tz });
+  }
+
+  @Get(':coords/unit/:unit/:part')
+  async bySlice(
+    @Res() res: Response,
+    @Param('coords') coords: string,
+    @Param('unit') unit: string,
+    @Param('part') part: string,
+    @Headers('x-tz') tz?: string
+  ) {
+    if (!this.weather.ready()) {
+      return res.sendStatus(503);
+    }
+    if (!isWeatherSlice(part)) {
+      return res.sendStatus(404);
+    }
+    const [lat, lon] = coords.split(',');
+    return this.weather.getByLatLon(res, { lat, lon, unit, tz, part });
   }
 
   @Get(':coords')

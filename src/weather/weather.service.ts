@@ -39,7 +39,7 @@ export class WeatherService {
     const data = await this.#backend!.fetch(res, { lat, lon, unit, tz });
     if (data) {
       try {
-        return res.json(this.#backend!.serialize(data, unit || units.DEFAULT)).end();
+        return res.json(this.#backend!.serialize(data, unit || units.DEFAULT, options.part || 'all')).end();
       } catch (e) {
         logger.debug(e);
         logger.debug((e as Error).stack);
