@@ -4,6 +4,7 @@ import swaggerui from 'swagger-ui-express';
 import helmet from 'helmet';
 import cors from 'cors';
 import cache from 'apicache';
+import { cacheDuration } from './cacheDuration';
 import fs from 'node:fs';
 import yaml from 'js-yaml';
 import favicon from 'express-favicon-short-circuit';
@@ -38,6 +39,14 @@ export const applyExpressAddons = (http: Express) => {
     })
   );
 
-  http.use(cache.middleware('20 minutes'));
+  const caches = new Map<string, ReturnType<typeof cache.middleware>>();
+  const cacheFor = (duration: string) => {
+    const existing = caches.get(duration);
+    if (existing) return existing;
+    const middleware = cache.middleware(duration);
+    caches.set(duration, middleware);
+    return middleware;
+  };
+  http.use((req, res, next) => cacheFor(cacheDuration(req.path))(req, res, next));
   http.use(favicon);
 };
