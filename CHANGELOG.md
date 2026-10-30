@@ -1,3 +1,11 @@
+# [1.3.0](https://github.com/LibreWeather/libre-weather-api/compare/v1.2.2...v1.3.0) (2026-10-30)
+
+
+### Features
+
+* add current, hourly, and daily weather routes ([f72a75c](https://github.com/LibreWeather/libre-weather-api/commit/f72a75c24fcb4bfa31f8ff1f765a8354e089ae32))
+* cache each weather slice on its own clock ([9f90fc3](https://github.com/LibreWeather/libre-weather-api/commit/9f90fc30da2136b362e1eabdf726444edf3ac9da))
+
 ## [1.2.2](https://github.com/LibreWeather/libre-weather-api/compare/v1.2.1...v1.2.2) (2026-10-13)
 
 
