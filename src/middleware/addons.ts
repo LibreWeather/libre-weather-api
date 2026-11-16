@@ -5,6 +5,7 @@ import helmet from 'helmet';
 import cors from 'cors';
 import cache from 'apicache';
 import { cacheDuration } from './cacheDuration';
+import { chooseBackend } from '../weather/backendChoice';
 import fs from 'node:fs';
 import yaml from 'js-yaml';
 import favicon from 'express-favicon-short-circuit';
@@ -18,7 +19,16 @@ const adminCred = {
 const isProd = false;
 
 export const applyExpressAddons = (http: Express) => {
-  http.use(cors());
+  http.use((req, res, next) => {
+    const header = req.headers['x-backend-key'];
+    const key = Array.isArray(header) ? header[0] : header;
+    if (typeof key === 'string') {
+      res.locals.backendKey = key;
+      delete req.headers['x-backend-key'];
+    }
+    next();
+  });
+  http.use(cors({ exposedHeaders: ['x-backend'] }));
   http.use(helmet());
 
   const swaggerAuth = (_req: unknown, user: string, pass: string) =>
@@ -43,7 +53,12 @@ export const applyExpressAddons = (http: Express) => {
   const cacheFor = (duration: string) => {
     const existing = caches.get(duration);
     if (existing) return existing;
-    const middleware = cache.middleware(duration);
+    const middleware = cache.middleware(duration, (_req, res) => res.locals.skipCache !== true, {
+      appendKey: (req, res) => {
+        const choice = chooseBackend(req.headers['x-backend'], res.locals.backendKey);
+        return choice?.backend ?? '';
+      },
+    });
     caches.set(duration, middleware);
     return middleware;
   };

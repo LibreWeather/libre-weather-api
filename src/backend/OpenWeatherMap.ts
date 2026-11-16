@@ -8,6 +8,8 @@ import Backend from './Backend';
 import type { BackendOptions, WeatherPart } from './Backend';
 import type { Response } from 'express';
 
+const LIGHT_RAIN_CODES = new Set([300, 301, 310, 311, 313, 321, 500, 520]);
+
 export default class OpenWeatherMap extends Backend {
   /**
    * Open Weather root api url
@@ -27,6 +29,7 @@ export default class OpenWeatherMap extends Backend {
    * @returns {string}
    */
   static #conditionCode(conditionCode: number) {
+    if (LIGHT_RAIN_CODES.has(conditionCode)) return Condition.LIGHT_RAIN;
     if (conditionCode >= 200 && conditionCode < 600) {
       return Condition.RAIN;
     }
@@ -82,20 +85,15 @@ export default class OpenWeatherMap extends Backend {
       daily: 'current,minutely,hourly,alerts',
     };
     const dropped = exclude[part];
-    const url = `${this.#OPEN_WEATHER_ROOT}?lat=${lat}&lon=${lon}&appid=${this.#APP_ID}&units=${unit}`;
+    const key = options.key || this.#APP_ID;
+    const url = `${this.#OPEN_WEATHER_ROOT}?lat=${lat}&lon=${lon}&appid=${key}&units=${unit}`;
     return dropped ? `${url}&exclude=${dropped}` : url;
   }
 
   async fetch(res: Response, options: BackendOptions) {
     super.fetch(res, options);
-    const { lat, lon } = options;
-
-    let data;
-    if (lat && lon) {
-      data = await fetch(this.forecastUrl(options)).then((weather) => weather.json());
-    }
-
-    return data;
+    if (!options.lat || !options.lon) return null;
+    return this.readForecast(this.forecastUrl(options));
   }
 
   serialize(data: Record<string, any>, unit: string, part: WeatherPart = 'all'): any {

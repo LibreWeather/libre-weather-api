@@ -6,6 +6,7 @@ import yaml from 'js-yaml';
 import Volume from '../src/utils/volume';
 import OpenMeteo from '../src/backend/OpenMeteo';
 import OpenWeatherMap from '../src/backend/OpenWeatherMap';
+import PirateWeather from '../src/backend/PirateWeather';
 import { Condition, UnitSystem, VolumeUnit } from '../src/types';
 
 const hourIso = (offsetHours) => {
@@ -35,7 +36,7 @@ const meteoFixture = () => {
       dewpoint_2m: fill(62),
       apparent_temperature: fill(74),
       pressure_msl: fill(1013.2),
-      weathercode: [61, 61, 3, 3, 2, 2, 1, 0, 0, 0, 80, 61],
+      weathercode: [61, 63, 3, 3, 2, 2, 1, 0, 0, 0, 80, 61],
       cloudcover: fill(90),
       precipitation: [0.1, 0.2, 0, 0, 0, 0, 0, 0, 0, 0, 0.05, 0.4],
       precipitation_probability: [80, 70, 20, 10, 5, 0, 0, 0, 0, 10, 40, 90],
@@ -124,6 +125,8 @@ describe('OpenMeteo.serialize', () => {
     const rain = mapped.hourly.find((hour) => hour.condition === Condition.RAIN);
     assert.ok(rain, 'fixture includes rain hours');
     assert.match(rain.description, /rain|drizzle|shower|thunderstorm/i);
+    assert.equal(mapped.hourly[0].condition, Condition.LIGHT_RAIN);
+    assert.equal(mapped.hourly[0].description, 'Slight rain');
   });
 
   it('keeps rain and snow volumes in the requested unit (no double convert)', () => {
@@ -138,7 +141,7 @@ describe('OpenMeteo.serialize', () => {
     const mapped = meteo.serialize(meteoFixture(), UnitSystem.IMPERIAL);
     assert.ok(mapped.daily.length >= 1);
     const day = mapped.daily[0];
-    assert.equal(day.condition, Condition.RAIN);
+    assert.equal(day.condition, Condition.LIGHT_RAIN);
     assert.equal(typeof day.precipProbability, 'number');
     assert.equal(typeof day.precipHours, 'number');
     assert.ok(day.windspeed);
@@ -303,7 +306,7 @@ describe('OpenWeatherMap.serialize', () => {
 
   it('reads rain.1h objects and pop as a percent', () => {
     const mapped = owm.serialize(payload, UnitSystem.IMPERIAL);
-    assert.equal(mapped.hourly[0].condition, Condition.RAIN);
+    assert.equal(mapped.hourly[0].condition, Condition.LIGHT_RAIN);
     assert.equal(mapped.hourly[0].precipProbability, 15);
     assert.ok(mapped.hourly[0].precipVolume.value > 0);
     assert.equal(mapped.hourly[1].condition, Condition.CLOUDY);
@@ -324,6 +327,86 @@ describe('OpenWeatherMap.serialize', () => {
     assert.equal(current.daily, undefined);
     const url = owm.forecastUrl({ lat: '1', lon: '2', unit: 'metric', part: 'hourly' });
     assert.match(url, /exclude=current,minutely,daily,alerts/);
+  });
+});
+
+describe('PirateWeather.serialize', () => {
+  const pirate = new PirateWeather('secret-key');
+  const body = {
+    currently: {
+      time: 1_700_000_000,
+      summary: 'Rain',
+      icon: 'rain',
+      temperature: 12,
+      apparentTemperature: 10,
+      dewPoint: 8,
+      humidity: 0.8,
+      pressure: 1008,
+      windSpeed: 3,
+      windBearing: 90,
+      uvIndex: 1,
+      visibility: 10,
+    },
+    daily: { data: [{ sunriseTime: 1_700_000_100, sunsetTime: 1_700_040_000, icon: 'rain', summary: 'Rain' }] },
+    hourly: {
+      data: [
+        {
+          time: 1_700_000_000,
+          summary: 'Light rain',
+          icon: 'rain',
+          temperature: 12,
+          apparentTemperature: 10,
+          dewPoint: 8,
+          humidity: 0.5,
+          pressure: 1008,
+          cloudCover: 0.4,
+          precipProbability: 0.7,
+          precipIntensity: 1.5,
+          liquidAccumulation: 0.2,
+          snowAccumulation: 1,
+          precipType: 'rain',
+          windSpeed: 3,
+          windGust: 6,
+          windBearing: 90,
+          uvIndex: 1,
+          visibility: 10,
+        },
+        {
+          time: 1_700_003_600,
+          summary: 'Rain',
+          icon: 'rain',
+          precipIntensity: 4,
+          temperature: 11,
+          apparentTemperature: 9,
+          dewPoint: 7,
+          humidity: 0.6,
+          cloudCover: 0.5,
+          precipProbability: 0.8,
+          windSpeed: 4,
+          windBearing: 80,
+          visibility: 8,
+        },
+      ],
+    },
+  };
+
+  it('maps light rain from intensity and leaves a missing intensity as rain', () => {
+    const current = pirate.serialize(body, UnitSystem.METRIC, 'current');
+    assert.equal(current.current.condition, Condition.RAIN);
+    assert.equal(current.current.description, 'Rain');
+    assert.equal(current.current.humidity, 80);
+    const hourly = pirate.serialize(body, UnitSystem.METRIC, 'hourly');
+    assert.equal(hourly.hourly[0].condition, Condition.LIGHT_RAIN);
+    assert.equal(hourly.hourly[1].condition, Condition.RAIN);
+    assert.equal(hourly.hourly[0].precipVolume.value, 1.5);
+    assert.equal(hourly.hourly[0].rainVolume.value, 2);
+    assert.equal(hourly.hourly[0].snowVolume.value, 10);
+  });
+
+  it('keeps the key out of a failed-request shaped url by encoding it in the path only', () => {
+    const url = pirate.forecastUrl({ lat: '39.1', lon: '-94.58', unit: UnitSystem.METRIC, part: 'hourly', key: 'secret-key' });
+    assert.match(url, /api\.pirateweather\.net\/forecast\/secret-key\/39\.1,-94\.58/);
+    assert.match(url, /extend=hourly/);
   });
 });
 

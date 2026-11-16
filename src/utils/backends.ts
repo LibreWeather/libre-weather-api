@@ -1,4 +1,7 @@
-export const OWM = 'OWM';
-export const METEO = 'METEO';
+export enum BackendId {
+  OWM = 'OWM',
+  METEO = 'METEO',
+  PIRATE = 'PIRATE'
+}
 
-export default { OWM, METEO };
+export default BackendId;

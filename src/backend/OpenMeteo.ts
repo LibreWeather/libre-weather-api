@@ -123,12 +123,12 @@ export default class OpenMeteo extends Backend {
     3: Condition.CLOUDY,
     45: Condition.FOG,
     48: Condition.FOG,
-    51: Condition.RAIN,
-    53: Condition.RAIN,
+    51: Condition.LIGHT_RAIN,
+    53: Condition.LIGHT_RAIN,
     55: Condition.RAIN,
     56: Condition.SLEET,
     57: Condition.SLEET,
-    61: Condition.RAIN,
+    61: Condition.LIGHT_RAIN,
     63: Condition.RAIN,
     65: Condition.RAIN,
     66: Condition.SLEET,
@@ -137,7 +137,7 @@ export default class OpenMeteo extends Backend {
     73: Condition.SNOW,
     75: Condition.SNOW,
     77: Condition.SNOW,
-    80: Condition.RAIN,
+    80: Condition.LIGHT_RAIN,
     81: Condition.RAIN,
     82: Condition.RAIN,
     85: Condition.SNOW,
@@ -189,7 +189,7 @@ export default class OpenMeteo extends Backend {
 
   async fetch(res: Response, options: BackendOptions) {
     super.fetch(res, options);
-    return fetch(this.forecastUrl(options)).then((weather) => weather.json());
+    return this.readForecast(this.forecastUrl(options));
   }
 
   #mapCurrent(data: Record<string, any>, unit: string, tzOffset: number) {

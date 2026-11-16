@@ -7,6 +7,7 @@ import type { NestExpressApplication } from '@nestjs/platform-express';
 import { AppModule } from './app.module';
 import { applyExpressAddons } from './middleware/addons';
 import { logger } from './utils';
+import { BackendId, usableKey } from './weather/backendChoice';
 
 if (process.env.NODE_ENV !== 'production') {
   config();
@@ -15,6 +16,10 @@ if (process.env.NODE_ENV !== 'production') {
 async function bootstrap() {
   if (!process.env.BACKEND) {
     logger.error('No BACKEND defined!');
+    process.exit(1);
+  }
+  if (process.env.BACKEND === BackendId.PIRATE && !usableKey(process.env.PIRATE_WEATHER_KEY)) {
+    logger.error('BACKEND=PIRATE requires PIRATE_WEATHER_KEY');
     process.exit(1);
   }
 

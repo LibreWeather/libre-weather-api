@@ -26,3 +26,11 @@ Swagger doc included at `/docs`.
 
 #### Required Env Vars
 - `BACKEND=METEO`
+
+### [Pirate Weather](https://pirateweather.net)
+
+#### Required Env Vars
+- `BACKEND=PIRATE`
+- `PIRATE_WEATHER_KEY=key-here`
+
+A request can select another backend with `x-backend` (`OWM`, `METEO`, or `PIRATE`) and `x-backend-key`. An unknown name, an unusable key, or a failed fetch falls back to `BACKEND`. The response header `x-backend` names the backend that served the body.
