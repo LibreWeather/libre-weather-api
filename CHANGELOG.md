@@ -1,3 +1,10 @@
+## [1.3.1](https://github.com/LibreWeather/libre-weather-api/compare/v1.3.0...v1.3.1) (2026-11-16)
+
+
+### Bug Fixes
+
+* backend pref support ([da3d5b2](https://github.com/LibreWeather/libre-weather-api/commit/da3d5b223cb29d3a90b74aa8733148c1b74cba6e))
+
 # [1.3.0](https://github.com/LibreWeather/libre-weather-api/compare/v1.2.2...v1.3.0) (2026-10-30)
 
 
